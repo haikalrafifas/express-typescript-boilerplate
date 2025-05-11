@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 /**
  * Mail sender configuration
  */

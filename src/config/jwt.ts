@@ -1,5 +1,6 @@
-require('dotenv').config();
-
+/**
+ * JSON Web Token configuration
+ */
 module.exports = {
   /**
    * Used in authentication to access resources within this REST API.

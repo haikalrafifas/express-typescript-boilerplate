@@ -1,11 +1,25 @@
 const jwt = require('jsonwebtoken');
-
 const jwtConfig = require('@/config/jwt');
 
+/**
+ * Signs JWT token
+ * 
+ * @param payload 
+ * @param secret 
+ * @param expiresIn 
+ * @returns 
+ */
 const signToken = (payload: object, secret: string, expiresIn: string): string => {
   return jwt.sign(payload, secret, { expiresIn });
 };
 
+/**
+ * Verifies JWT token
+ * 
+ * @param token 
+ * @param secret 
+ * @returns 
+ */
 const verifyToken = (token: string, secret: string): object | string => {
   try {
     return jwt.verify(token, secret);
@@ -53,7 +67,7 @@ exports.access = {
  * Refresh token.
  */
 exports.refresh = {
-  sign: (payload: object) => signToken(payload, jwtConfig.refresh.secret, jwtConfig.refresh.ttl),
+  sign: () => signToken({}, jwtConfig.refresh.secret, jwtConfig.refresh.ttl),
   verify: (token: string) => verifyToken(token, jwtConfig.refresh.secret),
 };
 

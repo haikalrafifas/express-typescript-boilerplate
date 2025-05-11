@@ -10,13 +10,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "allowJs": true,
     "outDir": "./dist",
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*.ts", "src/config/*.js"],
+  "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]
 }

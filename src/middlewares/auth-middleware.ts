@@ -5,17 +5,10 @@
  * @module middlewares/authMiddleware
  */
 
-import { Request, NextFunction } from 'express';
-import { JsonResponse } from '@/types/json-response';
+import { NextFunction } from 'express';
+import { AuthenticatedRequest, JsonResponse } from '@/types/express-extension';
 
-const jwt = require('@/libraries/jwt');
-
-/**
- * Extended request interface with token payload
- */
-interface AuthenticatedRequest extends Request {
-  user?: Record<string, unknown>;
-}
+const jwt = require('@/utilities/jwt');
 
 /**
  * Middleware to verify access tokens in the Authorization header

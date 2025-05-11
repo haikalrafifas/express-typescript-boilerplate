@@ -1,21 +1,53 @@
 import { Request, NextFunction } from 'express';
-import { JsonResponse } from '@/types/json-response';
+import { JsonResponse } from '@/types/express-extension';
 
 /**
  * Attach response helper methods to the `res` object.
  */
-module.exports = (req: Request, res: JsonResponse, next: NextFunction) => {
-  // Success response helper
-  res.success = (message: string, data?: any) => {
+module.exports = (
+  req: Request,
+  res: JsonResponse,
+  next: NextFunction,
+) => {
+  /**
+   * Success response helper
+   * 
+   * @param message 
+   * @param data 
+   * @returns 
+   */
+  res.success = (
+    message: string,
+    data?: any,
+  ): JsonResponse => {
     const payload: any = { statusCode: 200, message };
-    if (data) payload.data = data;
+
+    if (data) {
+      payload.data = data;
+    }
+
     return res.status(200).json(payload);
   };
 
-  // Error response helper
-  res.error = (statusCode: number = 500, message: string = 'Internal server error', errors?: any[]) => {
+  /**
+   * Error response helper
+   * 
+   * @param statusCode 
+   * @param message 
+   * @param errors 
+   * @returns 
+   */
+  res.error = (
+    statusCode: number = 500,
+    message: string = 'Internal server error',
+    errors?: Record<string, string[]> | any[],
+  ): JsonResponse => {
     const payload: any = { statusCode, message };
-    if (errors) payload.errors = errors;
+
+    if (errors && Object.keys(errors).length > 0) {
+      payload.errors = errors;
+    }
+
     return res.status(statusCode).json(payload);
   };
 

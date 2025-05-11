@@ -1,5 +1,6 @@
-require('dotenv').config();
-
+/**
+ * Cross-Origin Resource Sharing configuration
+ */
 const allowedOrigins = process.env.ALLOWED_ORIGINS || '*';
 
 module.exports = {

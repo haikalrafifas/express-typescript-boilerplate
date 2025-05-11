@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { JsonResponse } from '@/types/json-response';
+import { JsonResponse } from '@/types/express-extension';
 
 const logger = require('@/utilities/logger');
 
@@ -9,6 +9,6 @@ exports.index = async (req: Request, res: JsonResponse) => {
     return res.success('Welcome!');
   } catch (error: any) {
     logger.error(error);
-    return res.error(500, 'Internal server error', error.message);
+    return res.error();
   }
 };

@@ -1,9 +1,7 @@
-require('dotenv').config();
-
 /**
  * File storage configuration
  */
-const driver = process.env.STORAGE_DRIVER || 'local';
+let driver = process.env.STORAGE_DRIVER || 'local';
 let storage: any;
 
 switch (driver) {
@@ -20,6 +18,7 @@ switch (driver) {
     break;
   
   default:
+    driver = 'local';
     break;
 }
 

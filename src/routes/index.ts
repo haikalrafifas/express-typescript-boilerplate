@@ -1,9 +1,6 @@
 const router = require('express').Router();
 
-const welcomeRoutes = require('./welcome-routes');
-const authRoutes = require('./auth-routes');
-
-router.use('/', welcomeRoutes);
-router.use('/auth', authRoutes);
+router.use('/v1', require('./v1'));
+// router.use('/v2', require('./v2'));
 
 module.exports = router;

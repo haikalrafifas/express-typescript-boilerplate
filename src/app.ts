@@ -14,7 +14,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(responseMiddleware);
-app.use('/api/v1', apiRoutes);
+app.use('/api', apiRoutes);
 
 app.listen(port, logger.log(`Server is running on port ${port}`));
 

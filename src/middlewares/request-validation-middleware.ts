@@ -1,287 +1,313 @@
-import { Request } from 'express';
-import { JsonResponse } from '@/types/json-response';
-
-const { check, query, validationResult, matchedData } = require('express-validator');
-
 /**
- * Utility function to dynamically build field validation rules based on the model array
- *
- * Usage:
- * fieldValidationRules({
- *   body: [ // For validating request body fields
- *     {
- *       name: 'field_name',
- *       type: 'integer|signed_integer|string|text|image|number',
- *       optional: true|false, // optional, default is false
- *     },
- *     ...
- *   ],
- *   query: [ // For validating query parameters
- *     {
- *       name: 'param_name',
- *       type: 'integer|signed_integer|string|text|number',
- *       required: true|false, // default is false for query params
- *       enum: ['value1', 'value2'] // optional, restricts to specific values
- *     },
- *     ...
- *   ],
- *   areRequired: true|false, // optional, default is true (for body fields)
- *   preserveBodyProps: true|false, // optional, default is false - if true, keeps existing req.body properties
- * });
- *
- * @param {Object} args - Arguments for configuring validation
- * @returns {Array} Middleware functions for validation
+ * Request validation engine
+ * Validates request using layer of abstraction.
+ * Built on top of express and express-validator.
+ * 
+ * Takes input from schema-based file:
+ * {
+ *   field_name: {
+ *      type: string | text | email | number | timestamp | date | image | boolean,
+ *      in: body | query | param,
+ *      optional: boolean,
+ *      mime: { only | except: string[] },
+ *      min: number,
+ *      max: number,
+ *   },
+ * }
+ * 
+ * where:
+ *   - type: Datatype
+ *   - in: Request location
+ *   - optional: Toggle whether the field is required or not
+ *   - mime: Mime types for image datatype
+ *   - min: Minimum range
+ *      > Minimum value: number, timestamp, date
+ *      > Minimum length: string
+ *      > Minimum size: image 
+ *   - max: Maximum range
+ *      > Maximum value: number, timestamp, date
+ *      > Maximum length: string
+ *      > Maximum size: image
+ * 
+ * If there is a failed validation, it returns a JSON response with an array of errors:
+ * {
+ *    statusCode: 400,
+ *    message: "Validation failed",
+ *    errors: {
+ *      field_name: [
+ *        "error message #1",
+ *        "error message #n",
+ *      ],
+ *    },
+ * }
+ * 
+ * Use this on routes:
+ * ```
+ * const validate = require('@/middlewares/request-validation-middleware');
+ * const fields = require('@/validators/resourcename-validator');
+ * router.post('/', validate(fields));
+ * ```
  */
-const fieldValidationRules = (args: any) => {
-  // Ensure at least one validation type is provided
-  if (!args || (!args.body && !args.query)) {
-    throw new Error('Expected body or query property in argument');
-  }
+import {
+  body,
+  query,
+  param,
+  ValidationChain,
+  validationResult,
+} from 'express-validator';
+import { Request, NextFunction } from 'express';
+import { JsonResponse } from '@/types/express-extension';
 
-  const {
-    body = [],
-    query: queryParams = [],
-    areRequired = true,
-    preserveBodyProps = false,
-  } = args;
-  const validationRules = [];
+type FieldType = // primitives
+                 'string' | 'number' | 'bigint' | 'boolean' |
+                 // string derivatives
+                 'text' | 'email' |
+                 // date & time
+                 'timestamp' | 'date' |
+                 // blobs
+                 'image' | 'audio' | 'video' | 'document' |
+                 // semi-structured
+                 'json' | 'xml';
 
-  // Process body field validations
-  if (body.length > 0) {
-    body.forEach((field: any) => {
-      let validationChain = check(field.name);
+type RequestLocation = 'body' | 'query' | 'param';
 
-      // Flag to know that a field is optional
-      const isFieldOptional = field.optional || !areRequired;
+type ValidationSchema = Record<string, ValidationConfig>;
 
-      // Apply validation based on the type
-      switch (field.type) {
-        case 'integer':
-          validationChain = validationChain
-            .isInt({ min: 1 })
-            .withMessage(`${field.name} is required and must be a positive integer.`);
+interface ValidationConfig {
+  type: FieldType;
+  in?: RequestLocation;
+  min?: number;
+  max?: number;
+  optional?: boolean;
+  mime?: {
+    only?: string[];
+    except?: string[];
+  };
+  nested?: ValidationSchema;
+}
+
+interface ValidationOption {
+  optional?: boolean;
+  only?: string | string[];
+  without?: string | string[];
+}
+
+const locationMap = { body, query, param };
+
+module.exports = function requestValidator(
+  schema: ValidationSchema,
+  options: ValidationOption,
+) {
+  return async (req: Request, res: JsonResponse, next: NextFunction) => {
+    const chains: ValidationChain[] = [];
+
+    // Determine which locations to apply the validation to
+    const applyOnly = options?.only
+      ? Array.isArray(options.only)
+        ? options.only
+        : [options.only]
+      : [];
+    const applyWithout = options?.without
+      ? Array.isArray(options.without)
+        ? options.without
+        : [options.without]
+      : [];
+
+    for (const [field, config] of Object.entries(schema)) {
+      const loc = config.in ?? 'body';
+
+      // Applies validation based on options.apply
+      if (applyWithout.length) {
+        if (applyWithout.includes(loc)) continue;
+      }
+
+      if (applyOnly.length) {
+        if (!applyOnly.includes(loc)) continue;
+      }
+
+      let validator = locationMap[loc](field);
+
+      const isDefaultQuery = loc === 'query' && !config.optional;
+      if (config.optional || options?.optional || isDefaultQuery) {
+        validator = validator.optional();
+      } else {
+        validator = validator.exists().withMessage(`${field} is required`);
+      }
+
+      switch (config.type) {
+        // primitives //
+        case 'string':
+          const min = config.min || 0;
+          const max = config.max || 255;
+
+          validator = validator
+            .isString()
+            .withMessage(`${field} must be a valid string`,)
+            .isLength({ min, max });
+
+          if (config.min) validator = validator
+            .withMessage(`${field} must be more than ${min} characters`);
+
+          if (config.max) validator = validator
+            .withMessage(`${field} must be less than ${max} characters`);
           break;
 
-        case 'signed_integer':
         case 'number':
-          if (isFieldOptional) {
-            validationChain = validationChain
-              .optional()
-              .isInt()
-              .withMessage(`${field.name} must be a signed integer.`);
-          } else {
-            validationChain = validationChain
-              .isInt()
-              .withMessage(`${field.name} is required and must be a signed integer.`);
+          validator = validator
+            .isNumeric()
+            .withMessage(`${field} must be a valid number`);
+
+          if (config.min !== undefined) {
+            validator = validator
+              .isFloat({ min: config.min })
+              .withMessage(`${field} must be more than ${config.min}`);
+          }
+
+          if (config.max !== undefined) {
+            validator = validator
+              .isFloat({ max: config.max })
+              .withMessage(`${field} must be less than ${config.max}`);
           }
           break;
 
-        case 'string':
-          validationChain = validationChain
-            .isString()
-            .trim()
-            .notEmpty()
-            .withMessage(`${field.name} is required. No data provided.`)
-            .isLength({ max: 255 })
-            .withMessage(`${field.name} must be no more than 255 characters.`);
+        case 'bigint':
+          break;
+        
+        case 'boolean':
+          validator = validator
+            .isBoolean()
+            .withMessage(`${field} must be a valid boolean`);
           break;
 
+        // string derivatives //
         case 'text':
-          validationChain = validationChain
+          validator = validator
             .isString()
-            .trim()
-            .notEmpty()
-            .withMessage(`${field.name} is required. No data provided.`);
+            .withMessage(`${field} must be a valid text`);
           break;
 
+        case 'email':
+          validator = validator
+            .isEmail()
+            .withMessage(`${field} must be a valid email`);
+          break;
+
+        // date & time //
+        case 'timestamp':
+          validator = validator.isISO8601().withMessage(
+            `${field} must be a valid timestamp format (Y-m-d H:i:s)`,
+          );
+          break;
+
+        case 'date':
+          validator = validator.matches(/^\d{4}-\d{2}-\d{2}$/).withMessage(
+            `${field} must be in date format (Y-m-d)`,
+          );
+          break;
+
+        // blobs //
         case 'image':
-          validationChain = validationChain.custom((value: any, { req }: any) => {
-            const imageNotSpecified = !req.files || !req.files[field.name];
-
-            // Skip-optional and not specified image
-            if (isFieldOptional && imageNotSpecified) {
-              return true;
+          const fileValidator = validator.custom((value, { req }) => {
+            const file = req.file || (req.files && req.files[field]);
+            if (!file || !config.mime) return true;
+        
+            const mime = file.mimetype;
+        
+            if (config.mime.only && !config.mime.only.includes(mime)) {
+              return false;
             }
-
-            // Ensure the image exists in the request
-            if (imageNotSpecified) {
-              throw new Error(`${field.name} is required.`);
+        
+            if (config.mime.except && config.mime.except.includes(mime)) {
+              return false;
             }
-
-            // Extract the uploaded file object from req.files
-            const image = req.files[field.name];
-
-            // Check if the file is an image and has .webp extension
-            if (!image.name.match(/\.(webp)$/)) {
-              throw new Error('Image must be in webp format.');
-            }
-
-            // Check file size
-            if (image.size > 10 * 1024 * 1024) {
-              throw new Error('Image must be smaller than 10MB.');
-            }
-
+        
             return true;
-          });
-          break;
-
-        default:
-          break;
-      }
-
-      // Handle optional body fields
-      if (
-        isFieldOptional &&
-        field.type !== 'image' &&
-        field.type !== 'number' &&
-        field.type !== 'signed_integer'
-      ) {
-        validationChain = validationChain.optional();
-      }
-
-      // Handle minimum length
-      if (field.min) {
-        validationChain = validationChain
-          .isLength({ min: field.min })
-          .withMessage(`${field.name} must be no less than ${field.min} characters.`);
-      }
-
-      // Handle email type
-      if (field.isEmail) {
-        validationChain = validationChain.isEmail().normalizeEmail();
-      }
-
-      validationRules.push(validationChain);
-    });
-  }
-
-  // Process query parameter validations
-  if (queryParams.length > 0) {
-    queryParams.forEach((param: any) => {
-      let validationChain = query(param.name);
-
-      // Query parameters are optional by default unless specified
-      const isRequired = param.required === true;
-
-      // Apply validation based on the type
-      switch (param.type) {
-        case 'integer':
-          validationChain = validationChain
-            .optional({ nullable: true, checkFalsy: true })
-            .isInt({ min: 1 })
-            .withMessage(`${param.name} must be a positive integer.`);
-          break;
-
-        case 'signed_integer':
-        case 'number':
-          validationChain = validationChain
-            .optional({ nullable: true, checkFalsy: true })
-            .isInt()
-            .withMessage(`${param.name} must be an integer.`);
-          break;
-
-        case 'string':
-          validationChain = validationChain
-            .optional({ nullable: true, checkFalsy: true })
-            .isString()
-            .trim()
-            .isLength({ max: 255 })
-            .withMessage(`${param.name} must be no more than 255 characters.`);
-          break;
-
-        case 'text':
-          validationChain = validationChain
-            .optional({ nullable: true, checkFalsy: true })
-            .isString()
-            .trim();
-          break;
-
-        default:
-          validationChain = validationChain.optional({
-            nullable: true,
-            checkFalsy: true,
-          });
-          break;
-      }
-
-      // Make required if specified
-      if (isRequired) {
-        validationChain = validationChain.exists().withMessage(`${param.name} is required.`);
-      }
-
-      // Handle enum values if specified
-      if (param.enum && Array.isArray(param.enum)) {
-        validationChain = validationChain
-          .optional({ nullable: true, checkFalsy: true })
-          .isIn(param.enum)
-          .withMessage(`${param.name} must be one of: ${param.enum.join(', ')}`);
-      }
-
-      // Add custom validation if provided
-      if (param.customValidation && typeof param.customValidation === 'function') {
-        validationChain = validationChain.custom((value: any, { req }: any) => {
-          if (value === undefined) return true;
-
-          const errorMessage = param.customValidation(value, req.query);
-          if (errorMessage) {
-            throw new Error(errorMessage);
+          }).withMessage(
+            config.mime?.only
+              ? `${field} must be of type: ${config.mime.only.join(', ')}`
+              : `${field} must not be of type: ${config.mime?.except?.join(', ')}`
+          );
+        
+          chains.push(fileValidator);
+        
+          if (config.min || config.max) {
+            const sizeValidator = locationMap[loc](field).custom((value, { req }) => {
+              const file = req.file || (req.files && req.files[field]);
+              if (!file) return true;
+        
+              const size = file.size / 1024; // kb
+              const min = config.min || 0; // kb
+              const max = config.max || 5120; // kb
+        
+              return !(size < min || size > max);
+            }).withMessage(
+              `${field} must be between ${config.min || 0}KB and ${config.max || 5120}KB`
+            );
+        
+            chains.push(sizeValidator);
           }
-          return true;
-        });
+          break;
+
+        case 'audio':
+          break;
+        
+        case 'video':
+          break;
+
+        case 'document':
+          break;
+
+        // semi-structured //
+        case 'json':
+          break;
+
+        case 'xml':
+          break;
+
+        default:
+          throw new Error(`Unknown type for field: ${field}`);
       }
 
-      validationRules.push(validationChain);
-    });
-  }
+      chains.push(validator);
+    }
 
-  // Add response middleware for validation errors
-  validationRules.push((req: Request, res: JsonResponse, next: any) => {
-    // Store existing req.body properties if preserveBodyProps is true
-    const existingBodyProps = preserveBodyProps ? { ...req.body } : {};
+    // Run all validation chains
+    for (const chain of chains) {
+      await chain.run(req);
+    }
 
+    // Return validation error response if exists
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const formattedErrors = errors.array().reduce((acc: any, error: any) => {
-        // Make sure we have a valid parameter name, defaulting to the parameter path if needed
-        const paramName = error.param || (error.path ? error.path : 'parameter');
-
-        if (acc[paramName]) {
-          acc[paramName].push(error.msg);
-        } else {
-          acc[paramName] = [error.msg];
+      const formattedErrors = errors.array().reduce((acc, err) => {
+        if ('path' in err) {
+          const field: any = err.path;
+          if (!acc[field]) acc[field] = [];
+          acc[field].push(err.msg);
         }
         return acc;
-      }, {});
+      }, {} as Record<string, string[]>);
 
       return res.error(400, 'Validation failed', formattedErrors);
     }
 
-    // Only populate validated data for body if there are field validations
-    if (body.length > 0) {
-      // Get validated body data
-      const validatedBody = matchedData(req, { onlyValidData: true, locations: ['body'] });
-
-      if (preserveBodyProps) {
-        // Merge validated body with existing body props, prioritizing validated data
-        req.body = { ...existingBodyProps, ...validatedBody };
-      } else {
-        // Save user ID before overwriting req.body
-        const userId = req.body.id;
-
-        // Use only validated data
-        req.body = validatedBody;
-
-        // Restore user ID if it existed
-        if (userId !== undefined) {
-          req.body.id = userId;
-        }
-      }
-    }
-
     next();
-  });
+  };
+}
 
-  return validationRules;
-};
+// const mimeValidator = (field: string, schema: FieldSchema): CustomValidator => (value, { req }) => {
+//   const file = req.file || (req.files && req.files[field]);
+//   if (!file || !schema.mime) return true;
 
-module.exports = fieldValidationRules;
+//   const mime = file.mimetype;
+
+//   if (schema.mime.only && !schema.mime.only.includes(mime)) {
+//     throw new Error(`${field} must be of type: ${schema.mime.only.join(', ')}`);
+//   }
+
+//   if (schema.mime.except && schema.mime.except.includes(mime)) {
+//     throw new Error(`${field} must not be of type: ${schema.mime.except.join(', ')}`);
+//   }
+
+//   return true;
+// };

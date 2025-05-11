@@ -1,32 +1,23 @@
-// Usage reference on @/middlewares/request-validation-middleware.ts
-const email = { name: 'email', type: 'string', isEmail: true };
-const password = { name: 'password', type: 'string', min: 6 };
-const retypePassword = { name: 'retype_password', type: 'string', min: 6 };
+const email = { type: 'email' };
+const password = { type: 'string', min: 6 };
 
 module.exports = {
-  register: [
-    { name: 'username', type: 'string' },
-    { ...email  },
-    { ...password },
-    { ...retypePassword },
-  ],
-  
-  login: [
-    { ...email },
-    { ...password },
-  ],
+  register: {
+    username: { type: 'string' },
+    email,
+    password,
+    retype_password: password,
+  },
 
-  sendPasswordResetVerification: [
-    { ...email },
-  ],
+  login: { email, password },
 
-  resetPassword: [
-    { name: 'token', type: 'text' },
-    { ...password },
-    { ...retypePassword },
-  ],
+  sendPasswordResetVerification: { email },
 
-  resendVerification: [
-    { ...email },
-  ],
+  resetPassword: {
+    token: { type: 'text' },
+    password,
+    retype_pasword: password,
+  },
+
+  resendVerification: { email },
 };
