@@ -17,6 +17,22 @@ This boilerplate is built with extensibility in mind, and is ready to integrate 
 - [Core Features](#core-features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
+- [API Specification](#api-specification)
+  - [Standard Response](#standard-response)
+    - [Success Response](#success-response)
+    - [Error Response](#error-response)
+  - [Authentication (non MFA)](#authentication-non-mfa)
+    - [Register](#register)
+    - [Login](#login)
+    - [Refresh Access Token](#refresh-access-token)
+    - [Logout](#logout)
+  - [CRUD Example (Events)](#crud-example-events)
+    - [Get All Events](#get-all-events)
+    - [Get Event by Slug](#get-event-by-slug)
+    - [Create a new Event](#create-a-new-event)
+    - [Update an Event](#update-an-event)
+    - [Delete an Event](#delete-an-event)
+- [Notes](#notes)
 
 ## Installation
 ### Bare Metal
@@ -106,3 +122,526 @@ Here's a breakdown of the main directories inside the `src/` folder:
 |**utilities/**|Reusable tools for the codebase.|
 |**validators/**|Schema definitions for request validation.|
 |**app.ts**|Main application entrypoint.|
+
+## API Specification
+### Standard Response
+#### Success Response
+```
+{
+  "statusCode": "number",
+  "message": "string",
+  "data": "object[] | object"
+}
+```
+#### Error Response
+```
+{
+  "statusCode": "number",
+  "message": "string",
+  "errors": "Record<string, string[]>",
+}
+```
+### Authentication (non MFA)
+#### Register
+Request:
+- Method: POST
+- Path: /api/v1/auth/register
+- Header:
+    - Content-Type:
+      - application/json
+      - application/x-www-form-urlencoded
+      - multipart/form-data
+- Body:
+  ```
+  {
+    "name": "string",
+    "email": "string|email",
+    "password": "string|min:6"
+  }
+  ```
+Response:
+- Success:
+  ```
+  {
+    "statusCode": 200,
+    "message": "Successfully registered new user!",
+    "data": "Partial<UserData>"
+  }
+  ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Validation failed",
+      "errors": {
+        "name": ["string"],
+        "email": ["string"],
+        "password": ["string"]
+      }
+    }
+    ```
+  - Conflict:
+    ```
+    {
+      "statusCode": 409,
+      "message": "User already registered"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+#### Login
+Request:
+- Method: POST
+- Path: /api/v1/auth/login
+- Header:
+  - Content-Type:
+    - application/json
+    - application/x-www-form-urlencoded
+    - multipart/form-data
+- Body:
+  ```
+  {
+    "email": "string|email",
+    "password": "string|min:6"
+  }
+  ```
+Response:
+- Success:
+  - Header:
+    - Set-Cookie: "refresh_token=<REFRESH_TOKEN>"
+  - Body:
+    ```
+    {
+      "statusCode": 200,
+      "message": "Successfully logged in!",
+      "data": {
+        "user": "Partial<UserData>",
+        "token": {
+          "type": "string",
+          "access": "string",
+          "expiresIn": "string|number"
+        },
+      },
+    }
+    ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Validation failed",
+      "errors": {
+        "email": ["string"],
+        "password": ["string"]
+      }
+    }
+    ```
+  - Unauthorized:
+    ```
+    {
+      "statusCode": 401,
+      "message": "Invalid credentials"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+#### Refresh Access Token
+Request:
+- Method: POST
+- Path: /api/v1/auth/refresh
+- Header:
+  - Cookie: "refresh_token=<REFRESH_TOKEN>"
+
+Response:
+- Success:
+  - Header:
+    - Set-Cookie: "refresh_token=<NEW_REFRESH_TOKEN>"
+  - Body:
+    ```
+    {
+      "statusCode": 200,
+      "message": "Successfully refreshed access token!",
+      "data": {
+        "user": "Partial<UserData>",
+        "token": {
+          "type": "string",
+          "access": "string",
+          "expiresIn": "string|number"
+        }
+      }
+    }
+    ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Refresh token is required"
+    }
+    ```
+  - Unauthorized:
+    ```
+    {
+      "statusCode": 401,
+      "message": "Invalid refresh token"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+#### Logout
+Request:
+- Method: DELETE
+- Path: /api/v1/auth/logout
+- Header:
+  - Cookie: "refresh_token=<REFRESH_TOKEN>"
+
+Response:
+- Success:
+  - Header:
+    - Set-Cookie: "refresh_token="
+  - Body:
+    ```
+    "statusCode": 200,
+    "message": "Successfully logged out!",
+    "data": "Partial<UserData>"
+    ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Refresh token is required"
+    }
+    ```
+  - Unauthorized -> Invalid refresh token:
+    ```
+    {
+      "statusCode": 401,
+      "message": "Invalid refresh token"
+    }
+    ```
+  - Unauthorized -> User session not found:
+    ```
+    {
+      "statusCode": 401,
+      "message": "User session not found"
+    }
+    ```
+  - Unauthorized -> User not found:
+    ```
+    {
+      "statusCode": 401,
+      "message": "User not found"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+### CRUD Example (Events)
+#### Get All Events
+Request:
+- Method: GET
+- Path: /api/v1/events
+- Query:
+  - page: "number"
+  - perPage: "number"
+  - sortBy: "string|only:starts_at,ends_at"
+  - sortDirection: "string|only:asc,desc"
+
+Response:
+- Success:
+  ```
+  {
+    "statusCode": 200,
+    "message": "Successfully get events!",
+    "data": [
+      {
+        ...Partial<EventData>,
+        "category": Partial<EventCategoryData>
+      },
+      ...
+    ]
+  }
+  ```
+- Error:
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+#### Get Event by Slug
+Request:
+- Method: GET
+- Path: /api/v1/events/:slug
+
+Response:
+- Success:
+  ```
+  {
+    "statusCode": 200,
+    "message": "Successfully get event by identifier!",
+    "data": {
+      ...Partial<EventData>,
+      "category": Partial<EventCategoryData>
+    }
+  }
+  ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Validation failed",
+      "errors": {
+        "slug": ["string"]
+      }
+    }
+    ```
+  - Not found:
+    ```
+    {
+      "statusCode": 404,
+      "message": "Event not found"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+#### Create a new Event
+Request:
+- Method: POST
+- Path: /api/v1/events
+- Header:
+  - Authentication: "Bearer <ACCESS_TOKEN>"
+  - Content-Type:
+    - application/json
+    - application/x-www-form-urlencoded
+    - multipart/form-data
+- Body:
+  ```
+  {
+    "category_id": "number",
+    "title": "string",
+    "snippet": "string|optional",
+    "content": "string",
+    "cover": "image|optional",
+    "starts_at": "timestamp",
+    "ends_at": "timestamp"
+  }
+  ```
+Response:
+- Success:
+  - Body:
+    ```
+    {
+      "statusCode": 200,
+      "message": "Successfully create an event!",
+      "data": {
+        ...Partial<EventData>,
+        "category": Partial<EventCategoryData>
+      }
+    }
+    ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Validation failed",
+      "errors": {
+        "category_id": ["string"],
+        "title": ["string"],
+        "snippet": ["string"],
+        "content": ["string"],
+        "cover": ["string"],
+        "starts_at": ["string"],
+        "ends_at": ["string"],
+      }
+    }
+    ```
+  - Unauthorized:
+    ```
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+#### Update an Event
+Request:
+- Method: PATCH
+- Path: /api/v1/events/:slug
+- Header:
+  - Authentication: "Bearer <ACCESS_TOKEN>"
+  - Content-Type:
+    - application/json
+    - application/x-www-form-urlencoded
+    - multipart/form-data
+- Body:
+  ```
+  {
+    "category_id": "number|optional",
+    "title": "string|optional",
+    "snippet": "string|optional",
+    "content": "string|optional",
+    "cover": "image|optional",
+    "starts_at": "timestamp|optional",
+    "ends_at": "timestamp|optional"
+  }
+  ```
+Response:
+- Success:
+  - Body:
+    ```
+    {
+      "statusCode": 200,
+      "message": "Successfully update an event!",
+      "data": {
+        ...Partial<EventData>,
+        "category": Partial<EventCategoryData>
+      }
+    }
+    ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Validation failed",
+      "errors": {
+        "slug": ["string"],
+        "category_id": ["string"],
+        "title": ["string"],
+        "snippet": ["string"],
+        "content": ["string"],
+        "cover": ["string"],
+        "starts_at": ["string"],
+        "ends_at": ["string"],
+      }
+    }
+    ```
+  - Unauthorized:
+    ```
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  - Not found:
+    ```
+    {
+      "statusCode": 404,
+      "message": "Event not found"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+#### Delete an Event
+Request:
+- Method: DELETE
+- Path: /api/v1/events/:slug
+- Header:
+  - Authentication: "Bearer <ACCESS_TOKEN>"
+
+Response:
+- Success:
+  - Body:
+    ```
+    {
+      "statusCode": 200,
+      "message": "Successfully delete an event!",
+      "data": {
+        ...Partial<EventData>,
+        "category": Partial<EventCategoryData>,
+        "deleted_at": "timestamp"
+      }
+    }
+    ```
+- Error:
+  - Bad request:
+    ```
+    {
+      "statusCode": 400,
+      "message": "Validation failed",
+      "errors": {
+        "slug": ["string"],
+      }
+    }
+    ```
+  - Unauthorized:
+    ```
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  - Not found:
+    ```
+    {
+      "statusCode": 404,
+      "message": "Event not found"
+    }
+    ```
+  - Internal server error:
+    ```
+    {
+      "statusCode": 500,
+      "message": "Internal server error"
+    }
+    ```
+
+## Notes
+Since this boilerplate uses JWT with a combination of short and long-lived token expiration,
+the invalidation of user session is NOT as immediate as a traditional session-based authentication.
+For a specific use case where immediate invalidation of user session is the top-priority,
+please use the latter approach for authentication.
+
+This boilerplate also enforces multi factor authentication using email as its sole factor.
+Developers can disable this feature and use the default authentication flow by changing the value
+of `ENABLE_EMAIL_VERIFICATION` to `false` on the environment variable.
+Any other support (other than OAuth2.0), will require a small patch to the database schema.

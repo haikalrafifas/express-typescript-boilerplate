@@ -1,8 +1,10 @@
 import { Request, NextFunction } from 'express';
 import { JsonResponse } from '@/types/express-extension';
 
+const cookieConfig = require('@/config/cookie');
+
 /**
- * Attach response helper methods to the `res` object.
+ * Attach custom response properties to the `res` object.
  */
 module.exports = (
   req: Request,
@@ -10,7 +12,7 @@ module.exports = (
   next: NextFunction,
 ) => {
   /**
-   * Success response helper
+   * Success response property
    * 
    * @param message 
    * @param data 
@@ -30,7 +32,7 @@ module.exports = (
   };
 
   /**
-   * Error response helper
+   * Error response property
    * 
    * @param statusCode 
    * @param message 
@@ -49,6 +51,20 @@ module.exports = (
     }
 
     return res.status(statusCode).json(payload);
+  };
+
+  /**
+   * Cookie header property
+   * 
+   * @param key 
+   * @param value 
+   * @returns 
+   */
+  res.setCookie = (
+    key: string,
+    value: string,
+  ): JsonResponse => {
+    return res.cookie(key, value, cookieConfig);
   };
 
   next();

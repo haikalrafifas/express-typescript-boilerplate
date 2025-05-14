@@ -84,6 +84,10 @@ interface ValidationConfig {
     except?: string[];
   };
   nested?: ValidationSchema;
+  value?: {
+    only?: string | string[];
+    except?: string | string[];
+  };
 }
 
 interface ValidationOption {

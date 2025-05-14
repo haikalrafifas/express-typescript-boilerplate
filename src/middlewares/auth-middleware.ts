@@ -67,20 +67,22 @@ exports.accessToken = (req: AuthenticatedRequest, res: JsonResponse, next: NextF
  * @returns {void}
  */
 exports.refreshToken = (req: AuthenticatedRequest, res: JsonResponse, next: NextFunction): void => {
-  const refreshToken = req.body.refresh_token;
+  const refreshToken = req.cookies['refresh_token'];
 
   if (!refreshToken) {
-    res.error(401, 'Refresh token is required!');
+    res.error(400, 'Refresh token is required');
     return;
   }
 
   try {
-    const payload = jwt.refresh.verify(refreshToken);
-    req.user = payload;
-    next();
-  } catch (error) {
-    // Token is invalid, but we let the controller handle this case
-    // to potentially issue a new token or handle the error appropriately
+    req.user = { session: jwt.refresh.verify(refreshToken) };
+  } catch (error: any) {
+    // Only handle token expiracy to controller
+    if (error.name !== 'TokenExpiredError') {
+      res.error(401, 'Invalid refresh token');
+      return;
+    }
+  } finally {
     next();
   }
 };

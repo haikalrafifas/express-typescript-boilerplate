@@ -37,7 +37,7 @@ exports.store = async (req: Request, res: JsonResponse) => {
   try {
     const data = await eventService.createEvent(req.body);
 
-    return res.success('Successfully create event!', await toResource(data, eventResource));
+    return res.success('Successfully create an event!', await toResource(data, eventResource));
   } catch (error: any) {
     logger.error(error);
     return res.error();
@@ -54,7 +54,7 @@ exports.update = async (req: Request, res: JsonResponse) => {
 
     const data = await eventService.updateEvent(slug, req.body);
 
-    return res.success('Successfully update event by identifier!', await toResource(data, eventResource));
+    return res.success('Successfully update an event!', await toResource(data, eventResource));
   } catch (error: any) {
     logger.error(error);
     return res.error();
@@ -72,7 +72,7 @@ exports.destroy = async (req: Request, res: JsonResponse) => {
     const data = await eventService.deleteEvent(slug);
 
     return res.success(
-      'Successfully delete event!',
+      'Successfully delete an event!',
       { ...await toResource(data, eventResource), deleted_at: data.deleted_at },
     );
   } catch (error: any) {

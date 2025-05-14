@@ -1,9 +1,19 @@
+import { Request } from 'express';
+import { IssuedUserSession } from '@/types/express-extension';
 import { User, UserData } from '@/models/user-model';
+import { UserSession, UserSessionData } from '@/models/user-session-model';
 const crypto = require('@/utilities/crypto');
 const jwt = require('@/utilities/jwt');
+const string = require('@/utilities/string');
 const jwtConfig = require('@/config/jwt');
 const toResource = require('@/utilities/resource');
 const userResource = require('@/resources/user-resource');
+
+exports.findUserById = async (
+  id: number,
+): Promise<UserData | null> => {
+  return await User.query().findById(id);
+}
 
 exports.findUserByEmail = async (
   email: string,
@@ -11,14 +21,16 @@ exports.findUserByEmail = async (
   return await User.query().findOne({ email });
 };
 
-exports.findUserByRefreshToken = async (
-  refreshToken: string,
-): Promise<UserData | null> => {
-  return await User.query().findByOne({ remember_token: refreshToken });
+exports.findActiveUserSessionById = async (
+  sessionId: string,
+): Promise<UserSessionData | null> => {
+  return await UserSession.query()
+    .findById(sessionId)
+    .where('is_active', true);
 };
 
 exports.register = async (
-  user: any,
+  user: UserData,
 ): Promise<UserData> => {
   return await User.query().insert(user);
 };
@@ -30,34 +42,125 @@ exports.verify = async (
   return await crypto.compare(password, hashedPassword);
 };
 
-interface TokenData {
-  type: string;
-  access: string;
-  refresh: string;
-  expiresIn: string;
+interface AuthData {
+  user: Partial<UserData>;
+  token: {
+    type: string;
+    access: string;
+    expiresIn: string;
+  };
+  session: {
+    id: string;
+    user_id: number;
+    token: string;
+  };
 }
 
+/**
+ * Authenticate user and persist session
+ */
 exports.authenticate = async (
-  user: any,
-): Promise<Record<string, Partial<UserData> | TokenData>> => {
-  // filter visible columns
-  const visibleColumns = ['id', 'email', 'role', 'last_email_verify_requested_at'];
-  const userData = toResource(user, { only: visibleColumns });
+  req: Request,
+  user: UserData,
+): Promise<AuthData> => {;
+  const authData = await setAuthData(user, string.generateUUID());
+  await persistSession(req, authData);
+  return authData;
+};
 
-  // sign token
+/**
+ * Persist user session
+ */
+const persistSession = async (
+  req: Request,
+  auth: AuthData,
+) => {
+  await UserSession.query().insert({
+    id: auth.session.id,
+    user_id: auth.session.user_id,
+    user_agent: req.headers['user-agent'],
+    ip_address: req.ip,
+  });
+};
+exports.persistSession = persistSession;
+
+/**
+ * Revalidate user session
+ */
+exports.revalidate = async (
+  req: Request,
+  user: UserData,
+  oldSession: IssuedUserSession,
+): Promise<AuthData> => {
+  const newSessionId = string.generateUUID();
+
+  const authData = await setAuthData(user, newSessionId, oldSession.exp);
+  await persistSession(req, authData);
+
+  await UserSession.query()
+    .findById(oldSession.id)
+    .patch({
+      is_active: false,
+      last_used_at: new Date(),
+      replaced_by: newSessionId,
+    });
+
+  return authData;
+};
+
+/**
+ * Logs user out of the session
+ */
+exports.logout = async (
+  user: UserData,
+  userSession: UserSessionData,
+): Promise<Partial<UserData>> => {
+  await UserSession.query().findById(userSession.id).patch({
+    is_active: false,
+    revoked_at: new Date(),
+  });
+
+  return toResource(user, userResource);
+};
+
+/**
+ * Generates authenticated user data
+ * 
+ * @param user 
+ * @param sessionId 
+ * @param sessionTtl 
+ * @returns 
+ */
+const setAuthData = async (
+  user: UserData,
+  sessionId: string,
+  sessionExp?: number,
+): Promise<AuthData> => {
+  // filter visible columns for access token
+  const visibleColumns = ['id', 'email', 'role'];
+  const userData = await toResource(user, { only: visibleColumns });
+
+  // sign tokens
   const accessToken = jwt.access.sign(userData);
-  const refreshToken = jwt.refresh.sign();
-
-  // update refresh token on the database
-  await User.query().findById(user.id).patch({ remember_token: refreshToken });
+  let refreshToken;
+  if (sessionExp) {
+    // rotate refresh token
+    refreshToken = jwt.refresh.sign({ id: sessionId }, sessionExp);
+  } else {
+    refreshToken = jwt.refresh.sign({ id: sessionId });
+  }
 
   return {
-    user: toResource(user, userResource),
+    user: await toResource(user, userResource),
     token: {
       type: 'bearer',
       access: accessToken,
-      refresh: refreshToken,
       expiresIn: jwtConfig.access.ttl,
     },
+    session: {
+      id: sessionId,
+      user_id: user.id,
+      token: refreshToken,
+    }
   };
 };

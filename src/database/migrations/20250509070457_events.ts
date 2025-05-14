@@ -11,9 +11,11 @@ export async function up(knex: Knex): Promise<void> {
       table.integer(foreigns.category).unsigned().notNullable();
       table.string('slug', 255).notNullable().unique();
       table.string('title', 255).notNullable();
-      table.text('description');
-      table.date('starts_at');
-      table.date('ends_at');
+      table.string('snippet').nullable();
+      table.text('content').nullable();
+      table.text('cover').nullable();
+      table.date('starts_at').nullable();
+      table.date('ends_at').nullable();
       table.timestamps(true, true);
       table.timestamp('deleted_at');
 
@@ -24,5 +26,5 @@ export async function up(knex: Knex): Promise<void> {
 export async function down(knex: Knex): Promise<void> {
   return knex.schema.table('events', table => {
     Object.values(foreigns).map(key => table.dropForeign(key))
-  }).dropTable('events');
+  }).dropTableIfExists('events');
 }

@@ -6,7 +6,7 @@ module.exports = {
    * Used in authentication to access resources within this REST API.
    */
   access: {
-    ttl: '1h',
+    ttl: process.env.ACCESS_TOKEN_TTL || '10m',
     secret: process.env.ACCESS_TOKEN_SECRET || 'access',
   },
 
@@ -14,7 +14,8 @@ module.exports = {
    * Used to refresh access token after it expires.
    */
   refresh: {
-    ttl: '7d',
+    ttl: process.env.REFRESH_TOKEN_TTL || '7d',
+    extendedTtl: process.env.REFRESH_TOKEN_TTL_EXTENDED || '30d', // for remember_me
     secret: process.env.REFRESH_TOKEN_SECRET || 'refresh',
   },
 
@@ -22,7 +23,7 @@ module.exports = {
    * Used as temporary token for verification.
    */
   verification: {
-    ttl: '30m',
-    secret: process.env.VERIFICATION_TOKEN_SECRET || 'verification',
+    ttl: process.env.VERIFY_TOKEN_TTL || '30m',
+    secret: process.env.VERIFY_TOKEN_SECRET || 'verification',
   },
 };

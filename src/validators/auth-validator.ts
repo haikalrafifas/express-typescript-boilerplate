@@ -3,7 +3,7 @@ const password = { type: 'string', min: 6 };
 
 module.exports = {
   register: {
-    username: { type: 'string' },
+    name: { type: 'string' },
     email,
     password,
     retype_password: password,

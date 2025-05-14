@@ -9,7 +9,7 @@ exports.register = async (req: Request, res: JsonResponse) => {
 
   try {
     if (await authService.findUserByEmail(email)) {
-      return res.error(400, 'User already registered');
+      return res.error(409, 'User already registered');
     }
 
     const user = await authService.register(req.body);
@@ -28,16 +28,18 @@ exports.login = async (req: Request, res: JsonResponse) => {
     const user = await authService.findUserByEmail(email);
 
     if (!user) {
-      return res.error(400, 'Invalid credentials');
+      return res.error(401, 'Invalid credentials');
     }
 
     if (!authService.verify(password, user.password)) {
-      return res.error(400, 'Invalid credentials');
+      return res.error(401, 'Invalid credentials');
     }
 
-    const authenticatedUser = await authService.authenticate(user);
+    const { session, ...authenticated } = await authService.authenticate(req, user);
 
-    return res.success('Successfully logged in!', authenticatedUser);
+    res.setCookie('refresh_token', session.token);
+
+    return res.success('Successfully logged in!', authenticated);
   } catch (error: any) {
     logger.error('auth@login', error);
     return res.error();
@@ -45,21 +47,53 @@ exports.login = async (req: Request, res: JsonResponse) => {
 };
 
 exports.refresh = async (req: AuthenticatedRequest, res: JsonResponse) => {
-  const refreshToken = req.body.refresh_token;
+  const oldSession = req.user?.session;
 
   try {
     // if refresh token not found, then return error response
-    const user = await authService.findUserByRefreshToken(refreshToken);
+    const userSession = await authService.findActiveUserSessionById(oldSession?.id);
+    if (!userSession) {
+      return res.error(401, 'User session not found');
+    }
+
+    const user = await authService.findUserById(userSession.user_id);
     if (!user) {
-      return res.error(400, 'Invalid refresh token');
+      return res.error(401, 'User not found');
     }
     
     // refresh the access token
-    const authenticatedUser = await authService.authenticate(user);
+    const { session, ...validated } = await authService.revalidate(req, user, userSession);
 
-    return res.success('Successfully refreshed access token!', authenticatedUser);
+    res.setCookie('refresh_token', session.token);
+
+    return res.success('Successfully refreshed access token!', validated);
   } catch (error: any) {
     logger.error('auth@refresh', error);
     return res.error();
   }
 };
+
+exports.logout = async (req: AuthenticatedRequest, res: JsonResponse) => {
+  const session = req.user?.session;
+
+  try {
+    const userSession = await authService.findActiveUserSessionById(session?.id);
+    if (!userSession) {
+      return res.error(404, 'User session not found');
+    }
+
+    const user = await authService.findUserById(userSession.user_id);
+    if (!user) {
+      return res.error(404, 'User not found');
+    }
+
+    const revokedUser = await authService.logout(user, userSession);
+
+    res.clearCookie('refresh_token');
+
+    return res.success('Successfully logged out!', revokedUser);
+  } catch (error: any) {
+    logger.error('auth@logout', error);
+    return res.error();
+  }
+}

@@ -2,13 +2,19 @@ import {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from 'express';
-import { UserData } from '@/interfaces/user-interface';
+import { UserData } from '@/models/user-model';
 
 /**
  * Interface for accessing authenticated user request
  */
+export interface IssuedUserSession {
+  id: string;
+  exp: number;
+  iat: number;
+}
+
 export type AuthenticatedRequest = ExpressRequest & {
-  user?: Partial<UserData>;
+  user?: Partial<UserData> & { session: IssuedUserSession };
 };
 
 /**
@@ -24,5 +30,10 @@ export type JsonResponse = ExpressResponse & {
     statusCode?: number,
     message?: string,
     errors?: Record<string, string[]> | any[],
+  ) => ExpressResponse;
+
+  setCookie: (
+    key: string,
+    value: string,
   ) => ExpressResponse;
 };

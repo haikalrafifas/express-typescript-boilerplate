@@ -9,8 +9,12 @@ const jwtConfig = require('@/config/jwt');
  * @param expiresIn 
  * @returns 
  */
-const signToken = (payload: object, secret: string, expiresIn: string): string => {
-  return jwt.sign(payload, secret, { expiresIn });
+const signToken = (payload: object, secret: string, expiresIn?: string | number): string => {
+  if (expiresIn) {
+    return jwt.sign(payload, secret, { expiresIn });
+  } else {
+    return jwt.sign(payload, secret);
+  }
 };
 
 /**
@@ -67,7 +71,13 @@ exports.access = {
  * Refresh token.
  */
 exports.refresh = {
-  sign: () => signToken({}, jwtConfig.refresh.secret, jwtConfig.refresh.ttl),
+  sign: (payload: object, exp?: number): string => {
+    if (exp) {
+      return signToken({ ...payload, exp }, jwtConfig.refresh.secret);
+    } else {
+      return signToken(payload, jwtConfig.refresh.secret, jwtConfig.refresh.ttl);
+    }
+  },
   verify: (token: string) => verifyToken(token, jwtConfig.refresh.secret),
 };
 
