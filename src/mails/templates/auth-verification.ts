@@ -1,4 +1,4 @@
-module.exports = (content: string): string => {
+export default (content: string): string => {
   return `
     <header>
       <h1>Auth Verification</h1>

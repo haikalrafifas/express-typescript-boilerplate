@@ -1,0 +1,44 @@
+import { Request, Response, NextFunction } from 'express';
+
+interface RoleCheckOptions {
+  only?: string | string[];
+  except?: string | string[];
+}
+
+/**
+ * Middleware to check user roles.
+ *
+ * Must be declared after authentication middleware.
+ *
+ * @param options
+ * @returns
+ */
+export function checkRole(options: RoleCheckOptions) {
+  return async function (req: Request, res: Response, next: NextFunction) {
+    const user = (req as any).user;
+
+    if (!user || !user.role) {
+      return res.error(403, 'Forbidden');
+    }
+
+    const { only, except } = options;
+
+    // if (only && !user.role.some((role: string) => only.includes(role))) {
+    //   return res.error(403, 'Forbidden');
+    // }
+
+    // if (except && user.role.some((role: string) => except.includes(role))) {
+    //   return res.error(403, 'Forbidden');
+    // }
+
+    if (only && !only.includes(user.role)) {
+      return res.error(403, 'Forbidden');
+    }
+
+    if (except && except.includes(user.role)) {
+      return res.error(403, 'Forbidden');
+    }
+
+    return next();
+  };
+}

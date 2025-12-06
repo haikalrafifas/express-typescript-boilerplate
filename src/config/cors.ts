@@ -3,9 +3,11 @@
  */
 const allowedOrigins = process.env.ALLOWED_ORIGINS || '*';
 
-module.exports = {
-  origin: allowedOrigins.split(','),
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+const corsConfig = {
+  origin: allowedOrigins === '*' ? true : allowedOrigins.split(','),
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  credentials: true,
+  credentials: allowedOrigins !== '*',
 };
+
+export default corsConfig;

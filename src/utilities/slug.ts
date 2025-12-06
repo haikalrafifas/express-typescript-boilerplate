@@ -1,20 +1,37 @@
-const Model = require('@/config/database/orm');
-const string = require('./string');
+import Model from '@/database/orm';
+import { generateRandomAlphanum } from './string';
+
+/**
+ * Generate a slug from a string
+ * Converts to lowercase, replaces spaces & special chars with dashes
+ * Example: "Hello World!" => "hello-world"
+ */
+export const generateSlug = (str: string): string => {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // remove non-alphanumeric chars except dash
+    .replace(/[\s_-]+/g, '-') // replace spaces and underscores with dash
+    .replace(/^-+|-+$/g, ''); // remove leading/trailing dashes
+};
 
 /**
  * Generates a unique slug by checking if the slug already exists.
  * If the slug exists, appends a random suffix to the slug.
- * 
+ *
  * @param baseSlug - The base slug to be used (e.g., blog post title).
  * @returns A unique slug.
  */
-exports.generateUniqueSlug = async (baseSlug: string, model: typeof Model): Promise<string> => {
+export const generateUniqueSlug = async (
+  baseSlug: string,
+  model: typeof Model,
+): Promise<string> => {
   let slug = baseSlug.toLowerCase().replace(/\s+/g, '-');
   let isUnique = !(await model.query().findOne({ slug }));
 
   if (!isUnique) {
     // If the slug exists, append a random suffix
-    const randomSuffix = string.generateRandomAlphanum(6);
+    const randomSuffix = generateRandomAlphanum(6);
     slug = `${slug}-${randomSuffix}`;
   }
 

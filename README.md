@@ -1,7 +1,9 @@
 <!-- omit in toc -->
+
 # ExpressTS REST API Boilerplate
 
 A lightweight and flexible boilerplate for building JSON-based REST APIs, designed to serve as a foundation for common backend applications such as:
+
 - 🏷️ White-label platforms
 - 📊 Admin dashboards and analytics tools
 - 📰 Headless CMS implementations
@@ -10,18 +12,24 @@ A lightweight and flexible boilerplate for building JSON-based REST APIs, design
 This boilerplate is built with extensibility in mind, and is ready to integrate with modern backend technologies like WebSockets, message brokers, third-party APIs, and more. Use it as a starting point for scalable and modular backend architectures.
 
 <!-- omit in toc -->
+
 ## Table of Content
-- [Installation](#installation)
-  - [Bare Metal](#bare-metal)
-  - [Docker](#docker)
-- [Core Features](#core-features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [API Specification](#api-specification)
-- [Notes](#notes)
+
+- [ExpressTS REST API Boilerplate](#expressts-rest-api-boilerplate)
+  - [Table of Content](#table-of-content)
+  - [Installation](#installation)
+    - [Bare Metal](#bare-metal)
+    - [Docker](#docker)
+  - [Core Features](#core-features)
+  - [Tech Stack](#tech-stack)
+  - [Project Structure](#project-structure)
+  - [API Specification](#api-specification)
+  - [Notes](#notes)
 
 ## Installation
+
 ### Bare Metal
+
 - Get `Node.js` runtime @^18
 - Get node package manager (`pnpm` is preferred)
 - Clone this repository
@@ -32,27 +40,29 @@ This boilerplate is built with extensibility in mind, and is ready to integrate 
   ```
   pnpm install
   ```
-- Copy `.env.example` file into `.env` and modify the values
+- Copy `.env.example` file into `.env` and modify the values (set `DATABASE_DRIVER=mysql2` for MySQL, `pg` for PostgreSQL)
 - Build the application
   ```
-  pnpm run build
+  pnpm build
   ```
 - Populate database (if exist)
   ```
-  pnpm run db migrate:latest
-  pnpm run db seed:run
+  pnpm db migrate:latest
+  pnpm db seed:run
   ```
 - Start the application
   ```
   pnpm start
   ```
+
 ### Docker
+
 - Get `Docker` and `Docker Compose`
 - Clone this repository
   ```
   git clone https://github.com/haikalrafifas/express-typescript-boilerplate.git
   ```
-- Copy `.env.example` file into `.env` and modify the values
+- Copy `.env.example` file into `.env` and modify the values (set `DATABASE_DRIVER=mysql2` for MySQL, `pg` for PostgreSQL)
 - Build the application
   ```
   docker-compose build
@@ -68,51 +78,73 @@ This boilerplate is built with extensibility in mind, and is ready to integrate 
   ```
 
 ## Core Features
-|Name|Description|
-|--|--|
-|**Structured Codebase**|Clear separation of concerns using Model-View-Controller architecture.|
-|**JWT Authentication**|Secure and token-based authentication for APIs.|
-|**Built-in Middleware**|Authentication, request validation, and consistent response formatting.|
-|**Utility Toolkit**|Includes helpers for:<br>- Cryptography<br>- JWT handling<br>- Logging<br>- Resource serialization<br>- String manipulation<br>- Filesystem operations|
-|**Module Aliases**|Simplified imports using `@` alias.|
-|**Type Safety**|Comes with pre-defined types.|
-|**ORM and DB Management**|`Objection.js` as Object Relational Mapper, and `Knex.js` as query builder, database migration, and seeder.|
+
+| Name                      | Description                                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Structured Codebase**   | Clear separation of concerns using Model-View-Controller architecture.                                                     |
+| **JWT Authentication**    | Secure and token-based authentication for APIs.                                                                            |
+| **Built-in Middleware**   | Authentication, request validation, and consistent response formatting.                                                    |
+| **Utility Toolkit**       | Includes helpers for:<br>- Cryptography<br>- JWT handling<br>- Logging<br>- String manipulation<br>- Filesystem operations |
+| **Module Aliases**        | Simplified imports using `@` alias.                                                                                        |
+| **Type Safety**           | Comes with pre-defined types.                                                                                              |
+| **ORM and DB Management** | `Objection.js` as Object Relational Mapper, and `Knex.js` as query builder, database migration, and seeder.                |
 
 ## Tech Stack
-|Category|Technology|
-|-|-|
-|**Application**|Node.js + Express.js + Typescript|
-|**Web Server**|Any (Nginx preferred)|
-|**Database**|Any SQL database (PostgreSQL by default)|
-|**Mailer**|Nodemailer (e.g., Mailtrap, SMTP, etc.)|
-|**File Storage**|Local filesystem or Cloud Storage (e.g., Cloudinary)|
-|**Auth**|JSON Web Token (JWT)|
-|**Query Builder**|Knex.js|
-|**ORM**|Objection.js (built on top of Knex.js)|
-|**Schema**|Knex.js (for migrations and seeders)|
+
+| Category          | Technology                                           |
+| ----------------- | ---------------------------------------------------- |
+| **Application**   | Node.js + Express.js + Typescript                    |
+| **Web Server**    | Any (Nginx preferred)                                |
+| **Database**      | PostgreSQL or MySQL (configurable via env)           |
+| **Mailer**        | Nodemailer (e.g., Mailtrap, SMTP, etc.)              |
+| **File Storage**  | Local filesystem or Cloud Storage (e.g., Cloudinary) |
+| **Auth**          | JSON Web Token (JWT)                                 |
+| **Query Builder** | Knex.js                                              |
+| **ORM**           | Objection.js (built on top of Knex.js)               |
+| **Schema**        | Knex.js (for migrations and seeders)                 |
 
 ## Project Structure
-Here's a breakdown of the main directories inside the `src/` folder:
-|Name|Purpose|
-|-|-|
-|**config/**|Environment configs, app setup, and dependency initializations.|
-|**controllers/**|Handles request and returns response.|
-|**database/**|Database migrations and seed data.|
-|**mails/**|Mail templates and sending logic.|
-|**middlewares/**|Sits between route handlers.|
-|**models/**|Data representation and business logic.|
-|**resources/**|Schema definitions for JSON resource serialization.|
-|**routes/**|Application resource routings.|
-|**services/**|Reusable business logic extracted from controllers.|
-|**types/**|Custom TypeScript types and interfaces.|
-|**utilities/**|Reusable tools for the codebase.|
-|**validators/**|Schema definitions for request validation.|
-|**app.ts**|Main application entrypoint.|
+
+```
+src/
+├── app.ts                     # Main application entrypoint
+├── config/                    # Environment configs and app setup
+├── database/                  # Database migrations and seed data
+├── domains/                   # Domain-driven design domains
+│   └── v1/                    # API version
+│       └── [domain]/          # e.g., auth, books, users
+│           ├── controller.ts  # Request handling
+│           ├── model.ts       # Data models
+│           ├── route.ts       # Route definitions
+│           └── service.ts     # Business logic
+├── interfaces/                # TypeScript interfaces
+├── lang/                      # Internationalization files
+├── mails/                     # Email templates
+├── middlewares/               # Express middlewares
+├── schemas/                   # Validation schemas (Zod)
+├── utilities/                 # Reusable utilities
+└── filesystem/                # File handling utilities
+```
+
+| Directory        | Purpose                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| **config/**      | Environment configs, app setup, and dependency initializations.                |
+| **database/**    | Database migrations and seed data.                                             |
+| **domains/**     | Domain-driven design structure with controllers, models, routes, and services. |
+| **interfaces/**  | Custom TypeScript types and interfaces.                                        |
+| **lang/**        | Translation files for internationalization.                                    |
+| **mails/**       | Email templates and sending logic.                                             |
+| **middlewares/** | Express middlewares for authentication, validation, etc.                       |
+| **schemas/**     | Zod validation schemas.                                                        |
+| **utilities/**   | Reusable tools like crypto, JWT, logging, etc.                                 |
+| **app.ts**       | Main application entrypoint.                                                   |
 
 ## API Specification
+
 See the full [API Specification](docs/api.md) for details.
 
 ## Notes
+
 Since this boilerplate uses JWT with a combination of short and long-lived token expiration,
 the invalidation of user session is NOT as immediate as a traditional session-based authentication.
 For a specific use case where immediate invalidation of user session is the top-priority,

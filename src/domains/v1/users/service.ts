@@ -1,0 +1,40 @@
+import User from './model';
+import type { PaginationInput, PaginatedResult } from '@/interfaces/pagination';
+import * as filesystem from '@/utilities/filesystem';
+import { generatePaginatedData } from '@/utilities/pagination';
+
+export const fetchPaginated = async (
+  params: PaginationInput,
+): Promise<PaginatedResult<User>> => {
+  const baseQuery = User.query()
+    .whereNull('deleted_at')
+    .whereNot({ role: 'admin' });
+
+  return generatePaginatedData<User>(baseQuery, params);
+};
+
+export const findByUuid = async (userId: string): Promise<User | undefined> => {
+  return await User.query()
+    .where('uuid', userId)
+    .whereNull('deleted_at')
+    .first();
+};
+
+export const findByUsername = async (
+  username: string,
+): Promise<User | undefined> => {
+  return await User.query().findOne({ username });
+};
+
+export const update = async (entity: User, payload: User): Promise<User> => {
+  if (payload.image) {
+    const blob = payload.image as unknown as File;
+    payload.image = await filesystem.update(entity.image, blob, 'users');
+  }
+
+  return (await entity
+    .$query()
+    .patch({ ...payload })
+    .returning('*')
+    .first()) as User;
+};

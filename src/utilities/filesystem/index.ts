@@ -1,13 +1,33 @@
 /**
  * Cloud storage library.
  */
-const storage = require('@/config/storage');
+import { getStorage } from '../../config/filesystem';
 
 type StorageAction = 'upload' | 'remove' | 'update';
 const doFile = async (action: StorageAction, ...args: any[]): Promise<any> => {
-  return await require(`./${storage.driver}`)[action](...args);
+  const storage = await getStorage();
+  const medium = await import(`./${storage.driver}`);
+
+  if (typeof medium[action] !== 'function') {
+    throw new Error(
+      `Driver '${storage.driver}' does not implement action '${action}()'`,
+    );
+  }
+
+  return await medium[action](...args);
 };
 
-exports.upload = async (...args: any): Promise<any> => await doFile('upload', ...args);
-exports.remove = async (...args: any): Promise<any> => await doFile('remove', ...args);
-exports.update = async (...args: any): Promise<any> => await doFile('update', ...args);
+export const upload = async (...args: UploadArgs) =>
+  await doFile('upload', ...args);
+export const remove = async (...args: RemoveArgs) =>
+  await doFile('remove', ...args);
+export const update = async (...args: UpdateArgs) =>
+  await doFile('update', ...args);
+
+export type UploadArgs = [file: File, directory?: string];
+export type UpdateArgs = [
+  oldFilePath: string | null | undefined,
+  newFile: File,
+  directory?: string,
+];
+export type RemoveArgs = [filePath: string];

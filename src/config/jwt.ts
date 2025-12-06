@@ -1,7 +1,7 @@
 /**
  * JSON Web Token configuration
  */
-module.exports = {
+export default {
   /**
    * Used in authentication to access resources within this REST API.
    */

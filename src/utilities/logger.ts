@@ -1,27 +1,27 @@
-const logEnabled = (process.env.ENABLE_LOG || 'false') === 'true';
+import { ucfirst } from './string';
 
-const string = require('./string');
+const logEnabled = (process.env.ENABLE_LOG || 'true') === 'true';
 
 /**
  * Utility on top of `console` function.
  * Sends log to terminal.
- * 
- * @param level 
- * @param args 
+ *
+ * @param level
+ * @param args
  */
-const log = (level: keyof Console, ...args: any[]): void => {
+const _log = (level: keyof Console, ...args: any[]): void => {
   if (logEnabled) {
     // Get the current timestamp in Y-m-d H:i:s format
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toISOString().slice(0, -1).replace('T', ' ');
 
     // Prepend timestamp and log level
-    args.unshift(`[${timestamp}] ${string.ucfirst(level)}:`);
+    args.unshift(`[${timestamp}] ${ucfirst(level)}:`);
 
     // Output the log to the console
     (console[level] as (...args: any[]) => void)(...args);
   }
 };
 
-exports.log = (...args: any[]): void => log('log', ...args);
-exports.info = (...args: any[]): void => log('info', ...args);
-exports.error = (...args: any[]): void => log('error', ...args);
+export const log = (...args: any[]): void => _log('log', ...args);
+export const info = (...args: any[]): void => _log('info', ...args);
+export const error = (...args: any[]): void => _log('error', ...args);

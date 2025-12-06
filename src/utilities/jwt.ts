@@ -1,91 +1,88 @@
-const jwt = require('jsonwebtoken');
-const jwtConfig = require('@/config/jwt');
+import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 
-/**
- * Signs JWT token
- * 
- * @param payload 
- * @param secret 
- * @param expiresIn 
- * @returns 
- */
-const signToken = (payload: object, secret: string, expiresIn?: string | number): string => {
-  if (expiresIn) {
-    return jwt.sign(payload, secret, { expiresIn });
-  } else {
-    return jwt.sign(payload, secret);
-  }
-};
+const {
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_SECRET,
+  VERIFY_TOKEN_SECRET,
 
-/**
- * Verifies JWT token
- * 
- * @param token 
- * @param secret 
- * @returns 
- */
-const verifyToken = (token: string, secret: string): object | string => {
-  try {
-    return jwt.verify(token, secret);
-  } catch (error) {
-    throw new Error('Invalid or expired token');
-  }
-};
+  ACCESS_TOKEN_TTL,
+  REFRESH_TOKEN_TTL,
+  VERIFY_TOKEN_TTL,
+} = process.env;
 
-/**
- * Access token.
- */
-exports.access = {
-  sign: (payload: object) => signToken(payload, jwtConfig.access.secret, jwtConfig.access.ttl),
-  verify: (token: string) => verifyToken(token, jwtConfig.access.secret),
-  getExpiration: (): number => {
-    // Parse the TTL to get the number of seconds/minutes/hours
-    const ttl = jwtConfig.access.ttl;
-    const value = parseInt(ttl);
-    const unit = ttl.replace(/[0-9]/g, '');
+function textEncoder(secret: string) {
+  return new TextEncoder().encode(secret);
+}
 
-    // Calculate expiration time based on unit
-    let expiryMs = 0;
-    switch (unit) {
-      case 's':
-        expiryMs = value * 1000;
-        break;
-      case 'm':
-        expiryMs = value * 60 * 1000;
-        break;
-      case 'h':
-        expiryMs = value * 60 * 60 * 1000;
-        break;
-      case 'd':
-        expiryMs = value * 24 * 60 * 60 * 1000;
-        break;
-      default:
-        expiryMs = 3600 * 1000; // Default to 1 hour if format not recognized
-    }
+export default class JWTAuth {
+  private static ACCESS_SECRET = textEncoder(ACCESS_TOKEN_SECRET || 'access_secret_key');
+  private static REFRESH_SECRET = textEncoder(REFRESH_TOKEN_SECRET || 'refresh_secret_key');
+  private static VERIFY_SECRET = textEncoder(VERIFY_TOKEN_SECRET || 'verify_secret_key');
 
-    return Date.now() + expiryMs;
-  },
-};
+  private static ACCESS_EXPIRES_IN = ACCESS_TOKEN_TTL || '15m';
+  private static REFRESH_EXPIRES_IN = REFRESH_TOKEN_TTL || '7d';
+  private static VERIFY_EXPIRES_IN = VERIFY_TOKEN_TTL || '1h';
 
-/**
- * Refresh token.
- */
-exports.refresh = {
-  sign: (payload: object, exp?: number): string => {
-    if (exp) {
-      return signToken({ ...payload, exp }, jwtConfig.refresh.secret);
-    } else {
-      return signToken(payload, jwtConfig.refresh.secret, jwtConfig.refresh.ttl);
-    }
-  },
-  verify: (token: string) => verifyToken(token, jwtConfig.refresh.secret),
-};
+  /**
+   * Create and verify ACCESS tokens
+   */
+  static access = {
+    async sign(payload: object): Promise<string> {
+      return await new SignJWT(payload as JWTPayload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime(JWTAuth.ACCESS_EXPIRES_IN)
+        .sign(JWTAuth.ACCESS_SECRET);
+    },
 
-/**
- * Verification token.
- */
-exports.verification = {
-  sign: (payload: object) =>
-    signToken(payload, jwtConfig.verification.secret, jwtConfig.verification.ttl),
-  verify: (token: string) => verifyToken(token, jwtConfig.verification.secret),
-};
+    async verify<T extends object = JWTPayload>(token: string): Promise<T | null> {
+      try {
+        const { payload } = await jwtVerify(token, JWTAuth.ACCESS_SECRET);
+        return payload as T;
+      } catch {
+        return null;
+      }
+    },
+  };
+
+  /**
+   * Create and verify REFRESH tokens
+   */
+  static refresh = {
+    async sign(payload: object): Promise<string> {
+      return await new SignJWT(payload as JWTPayload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime(JWTAuth.REFRESH_EXPIRES_IN)
+        .sign(JWTAuth.REFRESH_SECRET);
+    },
+
+    async verify<T extends object = JWTPayload>(token: string): Promise<T | null> {
+      try {
+        const { payload } = await jwtVerify(token, JWTAuth.REFRESH_SECRET);
+        return payload as T;
+      } catch {
+        return null;
+      }
+    },
+  };
+
+  /**
+   * Create and verify VERIFICATION tokens
+   */
+  static verification = {
+    async sign(payload: object): Promise<string> {
+      return await new SignJWT(payload as JWTPayload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime(JWTAuth.VERIFY_EXPIRES_IN)
+        .sign(JWTAuth.VERIFY_SECRET);
+    },
+
+    async verify<T extends object = JWTPayload>(token: string): Promise<T | null> {
+      try {
+        const { payload } = await jwtVerify(token, JWTAuth.VERIFY_SECRET);
+        return payload as T;
+      } catch {
+        return null;
+      }
+    },
+  };
+}
