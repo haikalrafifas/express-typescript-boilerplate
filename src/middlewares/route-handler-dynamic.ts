@@ -11,6 +11,7 @@ router.use('/health', (req, res) => {
 });
 
 const domainsPath = join(import.meta.dirname, '../domains');
+console.log('domainsPath:', domainsPath);
 for (const version of readdirSync(domainsPath)) {
   const versionsPath = join(domainsPath, version);
   for (const domain of readdirSync(versionsPath)) {

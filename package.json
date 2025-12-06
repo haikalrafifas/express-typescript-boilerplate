@@ -2,13 +2,13 @@
   "name": "express-typescript-boilerplate",
   "version": "1.0.0",
   "description": "A boilerplate code of JSON REST API for common backend application.",
-  "main": "src/app.ts",
+  "main": "src/server.ts",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/app.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc && tsc-alias",
-    "build:local": "tsup",
-    "start": "node dist/app.js",
+    "build:bundle": "tsup",
+    "start": "node dist/server.js",
     "db": "knex --knexfile src/config/database/init.ts"
   },
   "dependencies": {
