@@ -1,18 +1,23 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/**/*.ts', '!src/database/{migrations,seeders}/*'],
+  entry: ['src/**/*.ts', '!src/database/**/*'],
   platform: 'node',
   format: 'esm',
   target: 'node20',
   outDir: 'dist',
   clean: true,
   dts: false,
-  minify: true,
+  minify: false,
   splitting: false,
   sourcemap: false,
-  treeshake: true,
+  treeshake: false,
   skipNodeModulesBundle: true,
-  bundle: true,
+  bundle: false,
   shims: true,
+  esbuildOptions(options) {
+    options.alias = {
+      '@': './src',
+    };
+  },
 });

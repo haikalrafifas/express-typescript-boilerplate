@@ -19,6 +19,7 @@ This boilerplate is built with extensibility in mind, and is ready to integrate 
   - [Table of Content](#table-of-content)
   - [Installation](#installation)
     - [Bare Metal](#bare-metal)
+    - [Vercel](#vercel)
     - [Docker](#docker)
   - [Core Features](#core-features)
   - [Tech Stack](#tech-stack)
@@ -53,6 +54,14 @@ This boilerplate is built with extensibility in mind, and is ready to integrate 
 - Start the application
   ```
   pnpm start
+  ```
+
+### Vercel
+
+- Install Vercel CLI
+- Deploy
+  ```
+  vercel --prod
   ```
 
 ### Docker

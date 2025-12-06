@@ -1,0 +1,12 @@
+src/
+tsconfig.json
+tsup.config.ts
+README.md
+LICENSE
+.git
+.gitignore
+.dockerignore
+docker/
+docs/
+_.md
+.env_

@@ -46,11 +46,8 @@ jspm_packages/
 # dotenv environment variables file
 .env
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
+# Vercel
+.vercel
 
 # OS generated files
 .DS_Store

@@ -10,13 +10,7 @@ router.use('/health', (req, res) => {
   res.json({ status: 'OK' });
 });
 
-const isCompiled = import.meta.filename.endsWith('.js');
-
-const domainsPath = join(
-  import.meta.dirname,
-  isCompiled ? '' : '..',
-  'domains',
-);
+const domainsPath = join(import.meta.dirname, '../domains');
 for (const version of readdirSync(domainsPath)) {
   const versionsPath = join(domainsPath, version);
   for (const domain of readdirSync(versionsPath)) {
