@@ -1,6 +1,5 @@
-import 'tsconfig-paths/register';
 import { Knex } from 'knex';
-const crypto = require('@/utilities/crypto');
+import * as crypto from '../../utilities/string/crypto';
 
 export async function seed(knex: Knex): Promise<void> {
   // Deletes ALL existing entries
@@ -8,7 +7,16 @@ export async function seed(knex: Knex): Promise<void> {
 
   // Inserts seed entries
   await knex('users').insert([
-    { name: 'Administrator', email: 'admin@example.com', password: await crypto.hash('admin123'), role:'admin' },
-    { name: 'Member', email: 'member@example.com', password: await crypto.hash('member123') },
+    {
+      name: 'Administrator',
+      email: 'admin@example.com',
+      password: await crypto.hash('admin123'),
+      role: 'admin',
+    },
+    {
+      name: 'Member',
+      email: 'member@example.com',
+      password: await crypto.hash('member123'),
+    },
   ]);
-};
+}

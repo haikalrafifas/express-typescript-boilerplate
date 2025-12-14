@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { readdirSync, existsSync } from 'fs';
 import { join } from 'path';
+import { pathToFileURL } from 'url';
 import { info } from '../utilities/logger';
 
 /**
@@ -13,7 +14,13 @@ router.use('/health', (req, res) => {
   res.json({ status: 'OK' });
 });
 
-const domainsPath = join(__dirname, '../domains');
+const isCompiled = import.meta.filename.endsWith('.js');
+
+const domainsPath = join(
+  import.meta.dirname,
+  isCompiled ? '' : '..',
+  'domains',
+);
 
 for (const version of readdirSync(domainsPath)) {
   const versionsPath = join(domainsPath, version);
@@ -29,7 +36,7 @@ for (const version of readdirSync(domainsPath)) {
 
     if (!fullPath) continue;
 
-    const routeModule = require(fullPath);
+    const routeModule = await import(pathToFileURL(fullPath).href);
     const domainRouter = routeModule.default || routeModule;
 
     const imported = `/api/${version}/${domain}`;
