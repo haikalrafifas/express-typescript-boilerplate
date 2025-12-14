@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "es2022",
-    // "moduleDetection": "force",
+    "module": "esnext",
+    "moduleDetection": "force",
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -11,15 +11,10 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "emitDeclarationOnly": false,
-    "allowImportingTsExtensions": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
     "outDir": "./build",
     "rootDir": "./src",
     "baseUrl": "."
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts"],
   "exclude": ["build", "node_modules"]
 }

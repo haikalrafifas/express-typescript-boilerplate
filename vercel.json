@@ -2,12 +2,9 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/app.ts",
+      "src": "build/app.js",
       "use": "@vercel/node"
     }
   ],
-  "routes": [{ "src": "/(.*)", "dest": "src/app.ts" }],
-  "env": {
-    "NODE_OPTIONS": "--experimental-require-module"
-  }
+  "routes": [{ "src": "/(.*)", "dest": "build/app.js" }]
 }
