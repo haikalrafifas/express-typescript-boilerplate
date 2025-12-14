@@ -1,8 +1,8 @@
 import express from 'express';
 
-import { accessToken } from '@/middlewares/authentication';
-import validate from '@/middlewares/request-validation';
-import * as schemas from '@/schemas/book';
+import { accessToken } from '../../../middlewares/authentication';
+import validate from '../../../middlewares/request-validation';
+import * as schemas from './schema';
 import * as bookController from './controller';
 
 const router = express.Router();

@@ -1,5 +1,11 @@
 import { Router } from 'express';
 
+/**
+ * Manual route registrar
+ *
+ * @param list
+ * @returns
+ */
 export default function registerRoutes(
   list: Record<string, Record<string, Router>>,
 ) {

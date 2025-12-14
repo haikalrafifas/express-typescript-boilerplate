@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { readdirSync, existsSync } from 'fs';
 import { join } from 'path';
-import { pathToFileURL } from 'url';
-import { info } from '@/utilities/logger';
+import { info } from '../utilities/logger';
+
+/**
+ * Dynamic route importer and mounter
+ */
 
 const router = Router();
 
@@ -10,8 +13,8 @@ router.use('/health', (req, res) => {
   res.json({ status: 'OK' });
 });
 
-const domainsPath = join(import.meta.dirname, '../domains');
-console.log('domainsPath:', domainsPath);
+const domainsPath = join(__dirname, '../domains');
+
 for (const version of readdirSync(domainsPath)) {
   const versionsPath = join(domainsPath, version);
   for (const domain of readdirSync(versionsPath)) {
@@ -26,8 +29,7 @@ for (const version of readdirSync(domainsPath)) {
 
     if (!fullPath) continue;
 
-    // Dynamic import (ESM) with file:// URL
-    const routeModule = await import(pathToFileURL(fullPath).href);
+    const routeModule = require(fullPath);
     const domainRouter = routeModule.default || routeModule;
 
     const imported = `/api/${version}/${domain}`;

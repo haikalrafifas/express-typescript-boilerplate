@@ -1,4 +1,4 @@
-import Model from '@/database/orm';
+import Model from '../../../../database/orm';
 // import User from '../../user/model';
 // import Permission from './permission';
 
@@ -21,8 +21,6 @@ export default class Role extends Model {
     //     to: 'users.id',
     //   },
     // },
-
-
     // permissions: {
     //   relation: Model.ManyToManyRelation,
     //   modelClass: Permission,

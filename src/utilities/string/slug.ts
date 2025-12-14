@@ -1,4 +1,4 @@
-import Model from '@/database/orm';
+import Model from '../../database/orm';
 import { generateRandomAlphanum } from './string';
 
 /**

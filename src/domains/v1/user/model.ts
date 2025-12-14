@@ -1,4 +1,4 @@
-import Model from '@/database/orm';
+import Model from '../../../database/orm';
 import Role from '../auth/models/role';
 
 export default class User extends Model {

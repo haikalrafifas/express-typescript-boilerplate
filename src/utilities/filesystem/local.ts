@@ -1,9 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const PROJECT_ROOT = path.join(__dirname, '../../../..');
 
@@ -11,10 +7,10 @@ const UPLOAD_DIR = path.join(PROJECT_ROOT, 'public/uploads');
 
 /**
  * Upload file to local
- * 
- * @param file 
- * @param directory 
- * @returns 
+ *
+ * @param file
+ * @param directory
+ * @returns
  */
 export const upload = async (
   file: File,
@@ -22,7 +18,7 @@ export const upload = async (
 ): Promise<any> => {
   try {
     const filename = `${Date.now()}_${file.name}`;
-    
+
     const uploadDir = path.join(UPLOAD_DIR, directory);
     const filePath = path.join(uploadDir, filename);
     const publicFilePath = path.join(directory, filename);
@@ -42,12 +38,10 @@ export const upload = async (
 
 /**
  * Removes local file
- * 
- * @param filePath 
+ *
+ * @param filePath
  */
-export const remove = async (
-  filePath: string,
-): Promise<void> => {
+export const remove = async (filePath: string): Promise<void> => {
   try {
     const fullPath = path.join(UPLOAD_DIR, filePath);
 
@@ -61,11 +55,11 @@ export const remove = async (
 
 /**
  * Updates local file
- * 
- * @param oldFilePath 
- * @param newFile 
- * @param directory 
- * @returns 
+ *
+ * @param oldFilePath
+ * @param newFile
+ * @param directory
+ * @returns
  */
 export const update = async (
   oldFilePath: string | null,

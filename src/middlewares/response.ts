@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-import cookieConfig from '@/config/cookie';
+import cookieConfig from '../config/cookie';
 
 export interface ApiResponse {
   success: boolean;

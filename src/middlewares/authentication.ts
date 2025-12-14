@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import JWTAuth from '@/utilities/jwt';
+import JWTAuth from '../utilities/jwt';
 
 const unauthorized = (res: Response) => {
   return res.error(401, 'Unauthorized');

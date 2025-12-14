@@ -1,7 +1,10 @@
 import User from './model';
-import type { PaginationInput, PaginatedResult } from '@/interfaces/pagination';
-import * as filesystem from '@/utilities/filesystem';
-import { generatePaginatedData } from '@/utilities/pagination';
+import {
+  PaginatedResult,
+  PaginationInput,
+  generatePaginatedData,
+} from '../../../utilities/pagination';
+import * as filesystem from '../../../utilities/filesystem';
 
 export const fetchPaginated = async (
   params: PaginationInput,

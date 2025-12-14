@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
-import JWTAuth from '@/utilities/jwt';
+import JWTAuth from '../../../utilities/jwt';
 
-import User from '../users/model';
-import { findByUsername } from '../users/service';
-import { generateUUID } from '@/utilities/string';
-import type { TokenUser } from '@/interfaces/token-user';
+import User from '../user/model';
+import { findByUsername } from '../user/service';
+import { generateUUID } from '../../../utilities/string';
+import type { TokenUser } from './interface';
 
 export { findByUsername };
 

@@ -1,4 +1,4 @@
-import Model from '@/database/orm';
+import Model from '../../../database/orm';
 
 export default class Book extends Model {
   static tableName = 'books';

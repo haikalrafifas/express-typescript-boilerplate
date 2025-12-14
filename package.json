@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "description": "A boilerplate code of JSON REST API for common backend application.",
   "main": "src/server.ts",
-  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc && tsc-alias",
-    "build:bundle": "tsup",
-    "start": "node dist/server.js",
+    "build": "tsc",
+    "start": "node build/server.js",
     "db": "knex --knexfile src/config/database/init.ts"
   },
   "dependencies": {
@@ -45,9 +43,6 @@
     "@types/nodemailer": "^7.0.4",
     "@types/pg": "^8.15.5",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.16",
-    "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   }

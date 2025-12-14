@@ -1,7 +1,10 @@
 import Book from './model';
-import type { PaginatedResult, PaginationInput } from '@/interfaces/pagination';
-import { generatePaginatedData } from '@/utilities/pagination';
-import * as filesystem from '@/utilities/filesystem';
+import {
+  PaginatedResult,
+  PaginationInput,
+  generatePaginatedData,
+} from '../../../utilities/pagination';
+import * as filesystem from '../../../utilities/filesystem';
 
 export const fetchPaginated = async (
   params: PaginationInput,

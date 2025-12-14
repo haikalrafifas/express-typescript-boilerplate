@@ -9,8 +9,12 @@ const swaggerDefinition: Options['swaggerDefinition'] = {
   },
   servers: [
     {
-      url: 'http://localhost:3000/api',
-      description: 'Development server',
+      url: 'http://localhost:3000/api/v1',
+      description: 'Development server v1',
+    },
+    {
+      url: 'http://localhost:3000/api/v2',
+      description: 'Development server v2',
     },
   ],
   components: {
@@ -38,7 +42,7 @@ const swaggerDefinition: Options['swaggerDefinition'] = {
 
 const options: Options = {
   swaggerDefinition,
-  apis: ['./src/domains/**/*/route.ts'],
+  apis: ['./src/domains/v1/**/*/route.ts', './src/domains/v2/**/*/route.ts'],
 };
 
 export default options;

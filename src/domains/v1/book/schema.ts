@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import pagination from './pagination';
+import pagination from '../../../utilities/pagination/schema';
 
 export const body = z.object({
   isbn: z.string().length(13, { message: 'ISBN must be 13 characters' }),
@@ -11,12 +11,25 @@ export const body = z.object({
     })
     .refine((file) => ['image/jpeg', 'image/png'].includes(file.type), {
       message: 'Only JPG or PNG images are allowed',
-    }).optional(),
-  snippet: z.string().max(255, { message: 'Snippet must be at most 255 characters' }).optional(),
-  author: z.string().max(255, { message: 'Author must be at most 255 characters' }).optional(),
-  publisher: z.string().max(255, { message: 'Publisher must be at most 255 characters' }).optional(),
+    })
+    .optional(),
+  snippet: z
+    .string()
+    .max(255, { message: 'Snippet must be at most 255 characters' })
+    .optional(),
+  author: z
+    .string()
+    .max(255, { message: 'Author must be at most 255 characters' })
+    .optional(),
+  publisher: z
+    .string()
+    .max(255, { message: 'Publisher must be at most 255 characters' })
+    .optional(),
   published_at: z.coerce.date().optional(),
-  category: z.string().max(100, { message: 'Category must be at most 100 characters' }).optional(),
+  category: z
+    .string()
+    .max(100, { message: 'Category must be at most 100 characters' })
+    .optional(),
   description: z.string().optional(),
   stock: z.number().int().nonnegative().optional(),
 });

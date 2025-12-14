@@ -1,7 +1,7 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
-import swaggerOptions from '@/config/docs';
+import swaggerOptions from '../config/docs';
 
 const DOCS_PATH = '/api-docs';
 

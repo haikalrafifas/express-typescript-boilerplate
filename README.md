@@ -121,18 +121,19 @@ src/
 ├── database/                  # Database migrations and seed data
 ├── domains/                   # Domain-driven design domains
 │   └── v1/                    # API version
-│       └── [domain]/          # e.g., auth, books, users
+│       └── [domain]/          # e.g., auth, book, user
 │           ├── controller.ts  # Request handling
+│           ├── entity.ts      # Database entity mapper
+│           ├── interface.ts   # Local/internal interface
 │           ├── model.ts       # Data models
 │           ├── route.ts       # Route definitions
+│           ├── schema.ts      # Validation schema (Zod)
 │           └── service.ts     # Business logic
-├── interfaces/                # TypeScript interfaces
 ├── lang/                      # Internationalization files
 ├── mails/                     # Email templates
 ├── middlewares/               # Express middlewares
-├── schemas/                   # Validation schemas (Zod)
-├── utilities/                 # Reusable utilities
-└── filesystem/                # File handling utilities
+├── types/                     # TypeScript global types
+└── utilities/                 # Reusable utilities
 ```
 
 | Directory        | Purpose                                                                        |
@@ -140,11 +141,10 @@ src/
 | **config/**      | Environment configs, app setup, and dependency initializations.                |
 | **database/**    | Database migrations and seed data.                                             |
 | **domains/**     | Domain-driven design structure with controllers, models, routes, and services. |
-| **interfaces/**  | Custom TypeScript types and interfaces.                                        |
 | **lang/**        | Translation files for internationalization.                                    |
 | **mails/**       | Email templates and sending logic.                                             |
 | **middlewares/** | Express middlewares for authentication, validation, etc.                       |
-| **schemas/**     | Zod validation schemas.                                                        |
+| **types/**       | Custom TypeScript global types.                                                |
 | **utilities/**   | Reusable tools like crypto, JWT, logging, etc.                                 |
 | **app.ts**       | Main application entrypoint.                                                   |
 

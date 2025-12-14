@@ -1,10 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { fileURLToPath } from 'url';
 import { Request } from 'express';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = join(__filename, '..', '..'); // src/utilities -> src
 
 const langDir = join(__dirname, 'lang');
 
