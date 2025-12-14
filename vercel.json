@@ -1,7 +1,16 @@
 {
   "version": 2,
-  "buildCommand": "pnpm build",
-  "outputDirectory": "build",
-  "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/server" }]
+  "builds": [
+    {
+      "src": "src/app.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "src/app.ts" },
+    { "src": "/(.*)", "dest": "build/app.js" }
+  ],
+  "env": {
+    "NODE_OPTIONS": "--experimental-require-module"
+  }
 }
