@@ -2,10 +2,11 @@
   "name": "express-typescript-boilerplate",
   "version": "1.0.0",
   "description": "A boilerplate code of JSON REST API for common backend application.",
+  "type": "module",
   "main": "src/server.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsup src/**/*.ts --outDir build --clean",
+    "build": "tsup src/**/*.ts --format esm --outDir build --clean",
     "start": "node build/server.js",
     "db": "knex --knexfile src/config/database/init.ts"
   },
@@ -27,7 +28,6 @@
     "nodemailer": "^6.10.1",
     "objection": "^3.1.5",
     "pg": "^8.15.6",
-    "serverless-http": "^4.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0",

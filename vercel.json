@@ -6,10 +6,7 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    { "src": "/(.*)", "dest": "src/app.ts" },
-    { "src": "/(.*)", "dest": "build/app.js" }
-  ],
+  "routes": [{ "src": "/(.*)", "dest": "src/app.ts" }],
   "env": {
     "NODE_OPTIONS": "--experimental-require-module"
   }
