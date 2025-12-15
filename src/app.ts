@@ -1,4 +1,3 @@
-import './types/api.d';
 import dotenv from 'dotenv';
 dotenv.config();
 
