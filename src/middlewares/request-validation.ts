@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
+import { z, ZodSafeParseResult } from 'zod';
 
 type RequestLocation = 'body' | 'query' | 'param';
 interface ValidationOption {
@@ -71,9 +71,9 @@ function mapValidationErrors(
  */
 export default function validate(option: ValidationOption) {
   return async function (req: Request, res: Response, next: NextFunction) {
-    let body,
-      query,
-      param = null;
+    let body: ZodSafeParseResult<any>;
+    let param: { [key: string]: any } | ZodSafeParseResult<any>;
+    let query: { [key: string]: any } | ZodSafeParseResult<any>;
 
     // apply optional to all location
     if (option.optional === '*') {

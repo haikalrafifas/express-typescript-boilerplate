@@ -12,6 +12,8 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "noEmit": true,
     "outDir": "./build",
     // "rootDir": "./src",
     "baseUrl": ".",
