@@ -2,8 +2,6 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "esnext",
-    "moduleDetection": "force",
-    "typeRoots": ["./src/types", "./node_modules/@types"],
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
