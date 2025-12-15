@@ -12,11 +12,10 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": true,
     "outDir": "./build",
-    // "rootDir": "./src",
+    "rootDir": "./src",
     "baseUrl": "."
   },
-  "include": ["src/**/*", "api/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["build", "node_modules"]
 }
