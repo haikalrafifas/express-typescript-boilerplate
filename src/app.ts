@@ -1,4 +1,3 @@
-/// <reference path="./types/api.d.ts" />
 import dotenv from 'dotenv';
 dotenv.config();
 

@@ -13,10 +13,10 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "outDir": "./build",
-    "rootDir": "./src",
+    // "rootDir": "./src",
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "api/**/*"],
   "exclude": ["build", "node_modules"]
 }
