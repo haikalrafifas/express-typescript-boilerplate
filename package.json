@@ -4,7 +4,8 @@
   "description": "A boilerplate code of JSON REST API for common backend application.",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx src/server.ts",
+    "dev:watch": "tsx watch src/server.ts",
     "build": "tsup src/**/*.ts --outDir build --clean",
     "start": "node build/server.js",
     "db": "knex --knexfile src/config/database/init.ts"
