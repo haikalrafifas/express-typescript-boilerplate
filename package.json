@@ -8,7 +8,7 @@
     "dev:watch": "tsx watch src/server.ts",
     "build": "tsc",
     "build:bundle": "tsup src/**/*.ts --outDir build --clean",
-    "start": "node build/src/server.js",
+    "start": "node build/server.js",
     "db": "knex --knexfile src/config/database/init.ts"
   },
   "dependencies": {

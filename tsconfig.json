@@ -14,11 +14,11 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "outDir": "./build",
-    // "rootDir": "./src",
+    "rootDir": "./src",
     "baseUrl": ".",
     "types": ["node", "express"],
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*", "api/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["build", "node_modules"]
 }
