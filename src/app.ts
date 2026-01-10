@@ -10,10 +10,10 @@ import corsOptions from './config/cors.js';
 import language from './middlewares/language.js';
 import apiResponse from './middlewares/response.js';
 import docs from './middlewares/docs.js';
+// import apiRoutes from './middlewares/route-mounter.js';
 import registerRoute from './middlewares/route-registrar.js';
 import apiRoutes from './config/routes.js';
 import errorHandler from './middlewares/error-handler.js';
-// import apiRoutes from './middlewares/route-mounter';
 
 const app = express();
 const upload = multer();

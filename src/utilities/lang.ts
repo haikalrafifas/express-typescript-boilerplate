@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { Request } from 'express';
 
-const langDir = join(__dirname, 'lang');
+const langDir = join(__dirname, 'languages');
 
 // Cache for loaded translations
 const translations: Record<string, Record<string, any>> = {};

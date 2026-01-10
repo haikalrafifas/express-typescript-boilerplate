@@ -29,3 +29,26 @@ export const generateRandomAlphanum = (length: number): string => {
 export const generateUUID = (): string => {
   return uuidv4();
 };
+
+/**
+ * Simple pluralizer based on common English suffix rules
+ */
+export const pluralize = (domain: string): string => {
+  if (domain.endsWith('uth')) {
+    return domain;
+  } else if (domain.endsWith('y')) {
+    // city -> cities, party -> parties
+    return domain.slice(0, -1) + 'ies';
+  } else if (
+    domain.endsWith('s') ||
+    domain.endsWith('x') ||
+    domain.endsWith('z') ||
+    domain.endsWith('ch') ||
+    domain.endsWith('sh')
+  ) {
+    // bus -> buses, box -> boxes
+    return domain + 'es';
+  } else {
+    return domain + 's'; // default: add 's'
+  }
+};
