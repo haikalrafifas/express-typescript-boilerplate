@@ -1,9 +1,9 @@
 import express from 'express';
 
-import { accessToken } from '../../../middlewares/authentication';
-import validate from '../../../middlewares/request-validation';
-import * as schemas from './schema';
-import * as bookController from './controller';
+import { accessToken } from '../../../middlewares/authentication.js';
+import validate from '../../../middlewares/request-validation.js';
+import * as schemas from './schema.js';
+import * as bookController from './controller.js';
 
 const router = express.Router();
 

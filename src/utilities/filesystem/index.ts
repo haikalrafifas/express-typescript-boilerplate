@@ -1,12 +1,12 @@
 /**
  * Cloud storage library.
  */
-import { getStorage } from '../../config/filesystem';
+import { getStorage } from '../../config/filesystem.js';
 
 type StorageAction = 'upload' | 'remove' | 'update';
 const doFile = async (action: StorageAction, ...args: any[]): Promise<any> => {
   const storage = await getStorage();
-  const medium = await import(`./${storage.driver}`);
+  const medium = await import(`./${storage.driver}.js`);
 
   if (typeof medium[action] !== 'function') {
     throw new Error(

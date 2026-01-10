@@ -1,5 +1,5 @@
-import Model from '../../../../database/orm';
-import Role from './role';
+import Model from '../../../../database/orm.js';
+import Role from './role.js';
 
 export default class Permission extends Model {
   static tableName = 'permissions';

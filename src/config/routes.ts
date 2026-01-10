@@ -1,5 +1,5 @@
-import authV1 from '../domains/v1/auth/route';
-import bookV1 from '../domains/v1/book/route';
+import authV1 from '../domains/v1/auth/route.js';
+import bookV1 from '../domains/v1/book/route.js';
 
 export default {
   v1: {

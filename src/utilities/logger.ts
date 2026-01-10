@@ -1,4 +1,4 @@
-import { ucfirst } from './string';
+import { ucfirst } from './string/index.js';
 
 const logEnabled = (process.env.ENABLE_LOG || 'true') === 'true';
 

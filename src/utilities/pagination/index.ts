@@ -1,3 +1,3 @@
-export * from './interface';
-export * from './pagination';
-export * from './schema';
+export * from './interface.js';
+export * from './pagination.js';
+export * from './schema.js';

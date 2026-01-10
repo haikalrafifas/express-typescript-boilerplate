@@ -1,4 +1,4 @@
-import { getStorage } from '../../config/filesystem';
+import { getStorage } from '../../config/filesystem.js';
 
 /**
  * Upload file to Cloudinary

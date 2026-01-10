@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { error } from '../utilities/logger';
+import { error } from '../utilities/logger.js';
 
 /**
  * Global error handler middleware

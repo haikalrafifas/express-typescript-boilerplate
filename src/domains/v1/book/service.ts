@@ -1,10 +1,10 @@
-import Book from './model';
+import Book from './model.js';
 import {
   PaginatedResult,
   PaginationInput,
   generatePaginatedData,
-} from '../../../utilities/pagination';
-import * as filesystem from '../../../utilities/filesystem';
+} from '../../../utilities/pagination/index.js';
+import * as filesystem from '../../../utilities/filesystem/index.js';
 
 export const fetchPaginated = async (
   params: PaginationInput,

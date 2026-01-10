@@ -1,5 +1,5 @@
 import type { QueryBuilder } from 'objection';
-import type { PaginatedResult, PaginationInput } from './interface';
+import type { PaginatedResult, PaginationInput } from './interface.js';
 
 export const generatePaginatedData = async <T>(
   baseQuery: QueryBuilder<any, T[]>,

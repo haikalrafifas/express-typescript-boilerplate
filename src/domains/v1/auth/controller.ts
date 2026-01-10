@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as authService from './service';
+import * as authService from './service.js';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = (req as any).validated;

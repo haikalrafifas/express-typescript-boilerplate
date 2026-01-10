@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { body as user } from '../user/schema';
+import { body as user } from '../user/schema.js';
 
 export const register = user.safeExtend({});
 

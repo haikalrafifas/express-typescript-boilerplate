@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as bookService from './service';
+import * as bookService from './service.js';
 
 export const index = async (req: Request, res: Response) => {
   const { page, limit } = req.validated;

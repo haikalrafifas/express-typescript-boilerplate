@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import pagination from '../../../utilities/pagination/schema';
+import pagination from '../../../utilities/pagination/schema.js';
 
 export const body = z
   .object({

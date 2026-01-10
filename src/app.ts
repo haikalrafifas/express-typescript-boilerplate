@@ -6,13 +6,13 @@ import cors from 'cors';
 import cookie from 'cookie-parser';
 import multer from 'multer';
 
-import corsOptions from './config/cors';
-import language from './middlewares/language';
-import apiResponse from './middlewares/response';
-import docs from './middlewares/docs';
-import registerRoute from './middlewares/route-registrar';
-import apiRoutes from './config/routes';
-import errorHandler from './middlewares/error-handler';
+import corsOptions from './config/cors.js';
+import language from './middlewares/language.js';
+import apiResponse from './middlewares/response.js';
+import docs from './middlewares/docs.js';
+import registerRoute from './middlewares/route-registrar.js';
+import apiRoutes from './config/routes.js';
+import errorHandler from './middlewares/error-handler.js';
 // import apiRoutes from './middlewares/route-mounter';
 
 const app = express();

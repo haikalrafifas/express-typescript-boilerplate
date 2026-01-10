@@ -1,5 +1,5 @@
-import Model from '../../../database/orm';
-import Role from '../auth/models/role';
+import Model from '../../../database/orm.js';
+import Role from '../auth/models/role.js';
 
 export default class User extends Model {
   static tableName = 'users';

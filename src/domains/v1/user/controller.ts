@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as userService from './service';
-import { authenticate } from '../auth/service';
+import * as userService from './service.js';
+import { authenticate } from '../auth/service.js';
 
 export const show = async (req: Request, res: Response) => {
   const userId = (req as any).user.sub;

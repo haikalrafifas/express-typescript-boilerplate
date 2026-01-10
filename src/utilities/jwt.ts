@@ -15,9 +15,15 @@ function textEncoder(secret: string) {
 }
 
 export default class JWTAuth {
-  private static ACCESS_SECRET = textEncoder(ACCESS_TOKEN_SECRET || 'access_secret_key');
-  private static REFRESH_SECRET = textEncoder(REFRESH_TOKEN_SECRET || 'refresh_secret_key');
-  private static VERIFY_SECRET = textEncoder(VERIFY_TOKEN_SECRET || 'verify_secret_key');
+  private static ACCESS_SECRET = textEncoder(
+    ACCESS_TOKEN_SECRET || 'access_secret_key',
+  );
+  private static REFRESH_SECRET = textEncoder(
+    REFRESH_TOKEN_SECRET || 'refresh_secret_key',
+  );
+  private static VERIFY_SECRET = textEncoder(
+    VERIFY_TOKEN_SECRET || 'verify_secret_key',
+  );
 
   private static ACCESS_EXPIRES_IN = ACCESS_TOKEN_TTL || '15m';
   private static REFRESH_EXPIRES_IN = REFRESH_TOKEN_TTL || '7d';
@@ -34,7 +40,9 @@ export default class JWTAuth {
         .sign(JWTAuth.ACCESS_SECRET);
     },
 
-    async verify<T extends object = JWTPayload>(token: string): Promise<T | null> {
+    async verify<T extends object = JWTPayload>(
+      token: string,
+    ): Promise<T | null> {
       try {
         const { payload } = await jwtVerify(token, JWTAuth.ACCESS_SECRET);
         return payload as T;
@@ -55,7 +63,9 @@ export default class JWTAuth {
         .sign(JWTAuth.REFRESH_SECRET);
     },
 
-    async verify<T extends object = JWTPayload>(token: string): Promise<T | null> {
+    async verify<T extends object = JWTPayload>(
+      token: string,
+    ): Promise<T | null> {
       try {
         const { payload } = await jwtVerify(token, JWTAuth.REFRESH_SECRET);
         return payload as T;
@@ -76,7 +86,9 @@ export default class JWTAuth {
         .sign(JWTAuth.VERIFY_SECRET);
     },
 
-    async verify<T extends object = JWTPayload>(token: string): Promise<T | null> {
+    async verify<T extends object = JWTPayload>(
+      token: string,
+    ): Promise<T | null> {
       try {
         const { payload } = await jwtVerify(token, JWTAuth.VERIFY_SECRET);
         return payload as T;

@@ -3,9 +3,9 @@ import express from 'express';
 const router = express.Router();
 
 // import { refreshToken } from '../../../middlewares/authentication';
-import validate from '../../../middlewares/request-validation';
-import * as schemas from './schema';
-import * as authController from './controller';
+import validate from '../../../middlewares/request-validation.js';
+import * as schemas from './schema.js';
+import * as authController from './controller.js';
 
 router.post(
   '/register',

@@ -1,5 +1,5 @@
-import Model from '../../database/orm';
-import { generateRandomAlphanum } from './string';
+import Model from '../../database/orm.js';
+import { generateRandomAlphanum } from './string.js';
 
 /**
  * Generate a slug from a string
